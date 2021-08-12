@@ -1,3 +1,11 @@
+#мои добавки ручную
+rss.sqlite
+venv
+config_RSS_FB
+config_RSS_FB.py
+
+#==== далее - это автоматическая настройка с ГитХаба
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
