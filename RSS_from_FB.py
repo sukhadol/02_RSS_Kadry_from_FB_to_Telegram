@@ -122,7 +122,7 @@ try:
 
         # Выполнение SQL-запроса для удаления записи из таблицы
         cursor = connection.cursor()
-        cursor.execute("DELETE FROM Table_Data_From_FB_RSS_kadry WHERE id < 3 RETURNING id;")
+        cursor.execute("DELETE FROM Table_Data_From_FB_RSS_kadry WHERE title_of_article = 'A post from Оксана Гатауллина';")
         connection.commit()
         count = cursor.rowcount
         print(count, "Запись успешно удалена")
