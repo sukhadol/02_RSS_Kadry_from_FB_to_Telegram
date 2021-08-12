@@ -77,20 +77,20 @@ if Run_On_Heroku:
     print('Создавать базу НЕ надо, на Heroku она есть автоматом')
 
     # начало блока для однократного запуска
-    try:
-        connection = psycopg2.connect(DATABASE_URL, sslmode='require')
-        connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-        cursor = connection.cursor()
-        sql_create_database = 'create database postgres_baze_from_rss'
-        cursor.execute(sql_create_database)
-        print('Создали новую базу')
-    except (Exception, Error) as error:
-        print("Ошибка при работе с PostgreSQL", error)
-    finally:
-        if connection:
-            cursor.close()
-            connection.close()
-            print("Создание базы данных: Соединение с PostgreSQL закрыто")
+    #try:
+    #    connection = psycopg2.connect(DATABASE_URL, sslmode='require')
+    #    connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+    #    cursor = connection.cursor()
+    #    sql_create_database = 'create database postgres_baze_from_rss'
+    #    cursor.execute(sql_create_database)
+    #    print('Создали новую базу')
+    #except (Exception, Error) as error:
+    #    print("Ошибка при работе с PostgreSQL", error)
+    #finally:
+    #    if connection:
+    #        cursor.close()
+    #        connection.close()
+    #        print("Создание базы данных: Соединение с PostgreSQL закрыто")
     # конец блока для однократного запуска
 
 else:
@@ -118,6 +118,21 @@ try:
     if Run_On_Heroku:
     #отсюда https://devcenter.heroku.com/articles/heroku-postgresql#connecting-in-python инструкция как подключиться к базе данных
         connection = psycopg2.connect(DATABASE_URL, sslmode='require')
+
+
+        # Выполнение SQL-запроса для удаления записи из таблицы
+
+        cursor.execute("DELETE FROM Table_Data_From_FB_RSS_kadry WHERE id < 3 RETURNING id;")
+        connection.commit()
+        count = cursor.rowcount
+        print(count, "Запись успешно удалена")
+        # Получить результат
+        cursor.execute("SELECT * from mobile")
+        print("Результат", cursor.fetchall())
+
+
+
+
     else:
         connection = psycopg2.connect(user="postgres",
     #                                password="Univer312",
