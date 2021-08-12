@@ -74,7 +74,7 @@ proxies = {
 # Создание базы данных
 if Run_On_Heroku:
     #отсюда https://devcenter.heroku.com/articles/heroku-postgresql#connecting-in-python инструкция как подключиться к базе данных
-    #connection = psycopg2.connect(DATABASE_URL, sslmode='require')
+    connection = psycopg2.connect(DATABASE_URL, sslmode='require')
     print('Создавать базу НЕ надо, на Heroku она есть автоматом')
 else:
     try:
