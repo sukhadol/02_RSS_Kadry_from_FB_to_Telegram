@@ -76,7 +76,7 @@ if Run_On_Heroku:
     #отсюда https://devcenter.heroku.com/articles/heroku-postgresql#connecting-in-python инструкция как подключиться к базе данных
     print('Создавать базу НЕ надо, на Heroku она есть автоматом')
 
-    # начало блока для однократного запуска
+    # начало блока для однократного запуска - хотя возможно и лишнее
     #try:
     #    connection = psycopg2.connect(DATABASE_URL, sslmode='require')
     #    connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
@@ -121,7 +121,7 @@ try:
 
 
         # Выполнение SQL-запроса для удаления записи из таблицы
-
+        cursor = connection.cursor()
         cursor.execute("DELETE FROM Table_Data_From_FB_RSS_kadry WHERE id < 3 RETURNING id;")
         connection.commit()
         count = cursor.rowcount
