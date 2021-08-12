@@ -118,27 +118,18 @@ try:
     if Run_On_Heroku:
     #отсюда https://devcenter.heroku.com/articles/heroku-postgresql#connecting-in-python инструкция как подключиться к базе данных
         connection = psycopg2.connect(DATABASE_URL, sslmode='require')
-
-
-        # Выполнение SQL-запроса для удаления записи из таблицы
-        cursor = connection.cursor()
-        cursor.execute("DELETE FROM Table_Data_From_FB_RSS_kadry WHERE title_of_article = 'Добрый вечер, коллеги! МГТУ Станкин требуются специалисты по осуществлению закупок - начальник  отдела и рядовые специалисты. Пр...';")
-        connection.commit()
-        count = cursor.rowcount
-        print(count, "Запись успешно удалена")
-        # Получить результат
-        cursor.execute("SELECT * from mobile")
-        print("Результат", cursor.fetchall())
-
-
-
+        # Выполнение SQL-запроса для удаления записи из таблицы - для тестирования базы
+        #cursor = connection.cursor()
+        #cursor.execute("DELETE FROM Table_Data_From_FB_RSS_kadry WHERE title_of_article = 'Добрый вечер, коллеги! МГТУ Станкин требуются специалисты по осуществлению закупок - начальник  отдела и рядовые специалисты. Пр...';")
+        #connection.commit()
+        #count = cursor.rowcount
+        #print(count, "Запись успешно удалена")
+        ## Получить результат
+        #cursor.execute("SELECT * from mobile")
+        #print("Результат", cursor.fetchall())
 
     else:
         connection = psycopg2.connect(user="postgres",
-    #                                password="Univer312",
-    #                                host="localhost",
-    #                                port="5432",
-    #                                database="postgres_baze_from_rss")    
                                      password=Password_to_local_PostgreSQL,
                                      host=host_for_postgres,
                                      port=port_for_postgres,
