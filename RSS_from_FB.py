@@ -74,8 +74,25 @@ proxies = {
 # Создание базы данных
 if Run_On_Heroku:
     #отсюда https://devcenter.heroku.com/articles/heroku-postgresql#connecting-in-python инструкция как подключиться к базе данных
-    connection = psycopg2.connect(DATABASE_URL, sslmode='require')
     print('Создавать базу НЕ надо, на Heroku она есть автоматом')
+
+    # начало блока для однократного запуска
+    try:
+        connection = psycopg2.connect(DATABASE_URL, sslmode='require')
+        connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        cursor = connection.cursor()
+        sql_create_database = 'create database postgres_baze_from_rss'
+        cursor.execute(sql_create_database)
+        print('Создали новую базу')
+    except (Exception, Error) as error:
+        print("Ошибка при работе с PostgreSQL", error)
+    finally:
+        if connection:
+            cursor.close()
+            connection.close()
+            print("Создание базы данных: Соединение с PostgreSQL закрыто")
+    # конец блока для однократного запуска
+
 else:
     try:
         connection = psycopg2.connect(user = "postgres",
