@@ -59,12 +59,12 @@ uags = [
 ]
 
 # Random User Agent (from uags list)
-ua = random.choice(uags)
+user_agent = random.choice(uags)
 
 # Header
 headers = {
   "Connection" : "close",  # another way to cover tracks
-  "User-Agent" : ua
+  "User-Agent" : user_agent
 }
 
 # Proxies
@@ -218,7 +218,7 @@ def bot_sendtext(bot_message):
 # Процедура получения фида, проверки его наличия в БД:
 def read_article_feed(feed):
     try:
-        feedparser.USER_AGENT = ua #потенциально строку можно и отключить
+        feedparser.USER_AGENT = user_agent #потенциально строку можно и отключить
         feed = feedparser.parse(feed)
         #feed_for_print = feed[: 80] + '...(есть продолжение)'
         #print('...feed= ')
