@@ -322,7 +322,7 @@ def get_posts():
 
         numb_days = 14 # глубина выборки базы для публикации. Увы, в следующей строчке автоматом не подхватилось, в причинах разбираться не стал, указал вручную
         cursor.execute("SELECT title_of_article, Date_of_article from Table_Data_From_FB_RSS_kadry WHERE (EXTRACT('DAY' FROM (now() - to_timestamp(Date_of_article, 'Dy DD Mon YYYY'))))<14")
-        print("======================\nРезультат базы данных за " + str(numb_days) + " последних дней =") # вернем записи поштучно
+        print("======================Результат базы данных за " + str(numb_days) + " последних дней =") # вернем записи поштучно
         for result in cursor:
             print(str(result))
 
