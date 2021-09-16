@@ -20,24 +20,20 @@ from requests.models import ProtocolError
 
 from pyquery import PyQuery as pq
 
-# Проверка мы работаем на Heroku или локально, сделано собственной переменной в оболочке Heroku, можно пробовать также значением DYNO 
+# Проверка мы работаем на Heroku или локально, сделано собственной переменной в оболочке Heroku 
 if 'We_are_on_Heroku' in os.environ:
     Run_On_Heroku = True
 else:
     Run_On_Heroku = False
 
-# получаем переменные из окружения или конфиг.файла
+# получаем переменные из окружения или конфиг.файла ChatID_for_RSSfrom_FB, Token_bot_for_RSSfrom_FB
 if Run_On_Heroku:
-    #from os import *
     ChatID_for_RSSfrom_FB = os.environ.get("ChatID_for_RSSfrom_FB")
     Token_bot_for_RSSfrom_FB = os.environ.get("Token_bot_for_RSSfrom_FB")
-    #Password_to_local_PostgreSQL =  хммм... наверное для Хероку не требуется?
-    #print("ChatID_for_RSSfrom_FB= " + ChatID_for_RSSfrom_FB)
-    #print("Token_bot_for_RSSfrom_FB= " + Token_bot_for_RSSfrom_FB)
     DATABASE_URL = os.environ['DATABASE_URL'] # взял по инструкции https://devcenter.heroku.com/articles/heroku-postgresql#connecting-in-python, хотя ключ расположен так же индивидуально у меня в личном кабинете
     port_for_postgres = int(os.environ.get("PORT", 5000))
-    host_for_postgres="localhost" # !!!! что-то надо править!!!
-    print('...Работаем на Хероку')
+    host_for_postgres="localhost" # !!!! что-то надо править?!!
+    print('===================== НАЧАЛИ...Работаем на Хероку')
 else:
     from config_RSS_FB import *
     port_for_postgres="5432"
@@ -75,24 +71,6 @@ proxies = {
 if Run_On_Heroku:
     #отсюда https://devcenter.heroku.com/articles/heroku-postgresql#connecting-in-python инструкция как подключиться к базе данных
     print('Создавать базу НЕ надо, на Heroku она есть автоматом')
-
-    # начало блока для однократного запуска - хотя возможно и лишнее
-    #try:
-    #    connection = psycopg2.connect(DATABASE_URL, sslmode='require')
-    #    connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-    #    cursor = connection.cursor()
-    #    sql_create_database = 'create database postgres_baze_from_rss'
-    #    cursor.execute(sql_create_database)
-    #    print('Создали новую базу')
-    #except (Exception, Error) as error:
-    #    print("Ошибка при работе с PostgreSQL", error)
-    #finally:
-    #    if connection:
-    #        cursor.close()
-    #        connection.close()
-    #        print("Создание базы данных: Соединение с PostgreSQL закрыто")
-    # конец блока для однократного запуска
-
 else:
     try:
         connection = psycopg2.connect(user = "postgres",
@@ -263,19 +241,15 @@ def read_article_feed(feed):
             #print(text_of_article)
             if article_NOT_in_BazeFromRSS(article['title'], article['published']):
                 add_article_to_db(article['title'], article['published'])
-                #bot_sendtext('*Форвард нового сообщения из Фейсбука:*\n\n' + text_of_article + article['link'])
+                #bot_sendtext('*Форвард нового сообщения из Фейсбука:*\n\n' + text_of_article + article['link']) #эта строка была сокращенной версией, без учета излишне линных сообщений
                 full_text = '*Форвард нового сообщения из Фейсбука:*\n\n' + text_of_article + article['link']
                 full_text = full_text.replace("#", " :")
                 # шестнадцатеричный код символа # = 0023, т.е. для отображения '\x23'. Но при его подстановке - в bot_sendtext вся последующая строка рассматривается как примечание и не видна
-                print('...len(full_text)='+str(len(full_text)))
-                print(full_text)
                 if len(full_text) > 4096:
                     full_text_fix= len(full_text)
                     while full_text_fix > 4096:
                         first_part_text = full_text[0:4096-35]
                         point_end_of_text = first_part_text.rfind("\n")  
-                        # print(' point_end_of_text = ')
-                        # print(str(point_end_of_text)) 
                         first_part_to_send = first_part_text[0:point_end_of_text]               
                         bot_sendtext(first_part_to_send + '\n_(продолжение следует...)_')
                         full_text = '\n_(...продолжение)_\n' + full_text[point_end_of_text:len(full_text)]
@@ -337,7 +311,6 @@ def get_posts():
 # Запускаем все это дело:
 if Run_On_Heroku: #вариант для Heroku
     if __name__ == '__main__':
-        print('===================== НАЧАЛИ ==========')
         spin_feds()
         get_posts()
         if connection:
