@@ -266,6 +266,8 @@ def read_article_feed(feed):
                 #bot_sendtext('*Форвард нового сообщения из Фейсбука:*\n\n' + text_of_article + article['link'])
 
                 full_text = '*Форвард нового сообщения из Фейсбука3:*\n\n' + text_of_article + article['link']
+                print('...len(full_text)='+str(len(full_text)))
+                full_text=str(len(full_text)) + full_text
                 if len(full_text) > 4096:
                     full_text_fix= len(full_text)
                     while full_text_fix > 4096:
