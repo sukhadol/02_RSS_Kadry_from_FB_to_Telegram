@@ -263,7 +263,25 @@ def read_article_feed(feed):
             #print(text_of_article)
             if article_NOT_in_BazeFromRSS(article['title'], article['published']):
                 add_article_to_db(article['title'], article['published'])
-                bot_sendtext('*Форвард нового сообщения из Фейсбука:*\n\n' + text_of_article + article['link'])
+                #bot_sendtext('*Форвард нового сообщения из Фейсбука:*\n\n' + text_of_article + article['link'])
+
+                full_text = '*Форвард нового сообщения из Фейсбука:*\n\n' + text_of_article + article['link']
+                if len(full_text) > 4096:
+                    full_text_fix= len(full_text)
+                    while full_text_fix > 4096:
+                        first_part_text = full_text[0:4096-35]
+                        point_end_of_text = first_part_text.rfind("\n")  
+                        # print(' point_end_of_text = ')
+                        # print(str(point_end_of_text)) 
+                        first_part_to_send = first_part_text[0:point_end_of_text]               
+                        bot_sendtext(first_part_to_send + '\n_(продолжение следует...)_')
+                        full_text = '\n_(...продолжение)_\n' + full_text[point_end_of_text:len(full_text)]
+                        full_text_fix= len(full_text)
+                    else:
+                        bot_sendtext(full_text)
+                else:
+                    bot_sendtext(full_text)
+
                 print('...добавляем в базу пост с заголовком= ')
                 print(article['title'])
             else:
