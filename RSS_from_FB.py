@@ -265,7 +265,7 @@ def read_article_feed(feed):
                 add_article_to_db(article['title'], article['published'])
                 #bot_sendtext('*Форвард нового сообщения из Фейсбука:*\n\n' + text_of_article + article['link'])
                 full_text = '*Форвард нового сообщения из Фейсбука:*\n\n' + text_of_article + article['link']
-                full_text = full_text.replace("#", " \x23")
+                full_text = full_text.replace("#", " :")
                 # шестнадцатеричный код символа # = 0023, т.е. для отображения '\x23'. Но при его подстановке - в bot_sendtext вся последующая строка рассматривается как примечание и не видна
                 print('...len(full_text)='+str(len(full_text)))
                 print(full_text)
