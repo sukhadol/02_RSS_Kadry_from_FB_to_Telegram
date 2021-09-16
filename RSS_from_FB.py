@@ -268,6 +268,7 @@ def read_article_feed(feed):
                 full_text = '*Форвард нового сообщения из Фейсбука3:*\n\n' + text_of_article + article['link']
                 print('...len(full_text)='+str(len(full_text)))
                 full_text=str(len(full_text)) + full_text
+                print(full_text)
                 if len(full_text) > 4096:
                     full_text_fix= len(full_text)
                     while full_text_fix > 4096:
@@ -321,7 +322,7 @@ def get_posts():
 
         numb_days = 14 # глубина выборки базы для публикации. Увы, в следующей строчке автоматом не подхватилось, в причинах разбираться не стал, указал вручную
         cursor.execute("SELECT title_of_article, Date_of_article from Table_Data_From_FB_RSS_kadry WHERE (EXTRACT('DAY' FROM (now() - to_timestamp(Date_of_article, 'Dy DD Mon YYYY'))))<14")
-        print("\nРезультат базы данных за " + str(numb_days) + " последних дней =") # вернем записи поштучно
+        print("======================\nРезультат базы данных за " + str(numb_days) + " последних дней =") # вернем записи поштучно
         for result in cursor:
             print(str(result))
 
@@ -336,6 +337,7 @@ def get_posts():
 # Запускаем все это дело:
 if Run_On_Heroku: #вариант для Heroku
     if __name__ == '__main__':
+        print('===================== НАЧАЛИ ==========')
         spin_feds()
         get_posts()
         if connection:
