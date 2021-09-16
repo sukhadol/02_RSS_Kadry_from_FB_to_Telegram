@@ -266,7 +266,7 @@ def read_article_feed(feed):
                 #bot_sendtext('*Форвард нового сообщения из Фейсбука:*\n\n' + text_of_article + article['link'])
                 text_of_article = text_of_article.replace("#", "\#")
 
-                full_text = '*Форвард нового сообщения из Фейсбука3:*\n\n' + text_of_article + article['link']
+                full_text = '*Форвард нового сообщения из Фейсбука:*\n\n' + text_of_article + article['link']
                 print('...len(full_text)='+str(len(full_text)))
                 full_text=str(len(full_text)) + full_text
                 print(full_text)
