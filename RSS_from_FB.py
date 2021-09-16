@@ -264,13 +264,10 @@ def read_article_feed(feed):
             if article_NOT_in_BazeFromRSS(article['title'], article['published']):
                 add_article_to_db(article['title'], article['published'])
                 #bot_sendtext('*Форвард нового сообщения из Фейсбука:*\n\n' + text_of_article + article['link'])
-                text_of_article = text_of_article.replace("#", " \x23")
-                #s='\x23'
-                #print(s)
-
                 full_text = '*Форвард нового сообщения из Фейсбука:*\n\n' + text_of_article + article['link']
+                full_text = full_text.replace("#", " \x23")
+                # шестнадцатеричный код символа # = 0023, т.е. для отображения '\x23'. Но при его подстановке - в bot_sendtext вся последующая строка рассматривается как примечание и не видна
                 print('...len(full_text)='+str(len(full_text)))
-                full_text=str(len(full_text)) + full_text
                 print(full_text)
                 if len(full_text) > 4096:
                     full_text_fix= len(full_text)
