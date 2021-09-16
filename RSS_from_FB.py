@@ -264,7 +264,7 @@ def read_article_feed(feed):
             if article_NOT_in_BazeFromRSS(article['title'], article['published']):
                 add_article_to_db(article['title'], article['published'])
                 #bot_sendtext('*Форвард нового сообщения из Фейсбука:*\n\n' + text_of_article + article['link'])
-                text_of_article = text_of_article.replace("#", "_")
+                text_of_article = text_of_article.replace("#", "\#")
 
                 full_text = '*Форвард нового сообщения из Фейсбука3:*\n\n' + text_of_article + article['link']
                 print('...len(full_text)='+str(len(full_text)))
