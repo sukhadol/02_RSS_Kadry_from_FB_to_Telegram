@@ -31,8 +31,8 @@ if Run_On_Heroku:
     ChatID_for_RSSfrom_FB = os.environ.get("ChatID_for_RSSfrom_FB")
     Token_bot_for_RSSfrom_FB = os.environ.get("Token_bot_for_RSSfrom_FB")
     DATABASE_URL = os.environ['DATABASE_URL'] # взял по инструкции https://devcenter.heroku.com/articles/heroku-postgresql#connecting-in-python, хотя ключ расположен так же индивидуально у меня в личном кабинете
-    port_for_postgres = int(os.environ.get("PORT", 5000))
-    host_for_postgres="localhost" # !!!! что-то надо править?!!
+    #port_for_postgres = int(os.environ.get("PORT", 5000))
+    #host_for_postgres="localhost" # !!!! что-то надо править?!!
     print('===================== НАЧАЛИ...Работаем на Хероку')
 else:
     from config_RSS_FB import *
@@ -203,9 +203,8 @@ def read_article_feed(feed):
         #print(feed)
         #print(feed_for_print)
         for article in feed['entries']:
-            #print('\n...пробуем очистку основного текста от кодов =')
             document = pq(article['summary'])
-            text_of_article = document.text() # это получили чистый текст
+            text_of_article = document.text() # это получили чистый текст, без кодов
             text_of_article = text_of_article.replace("(Feed generated with FetchRSS)", "") # убрали фразу (Feed generated with FetchRSS)
             text_of_article = text_of_article.replace("\n\n\n", "\n")      
             # если в ФБ был репост, то видим на странице пустое сообщение, поэтому его корректируем
@@ -243,8 +242,7 @@ def read_article_feed(feed):
                 add_article_to_db(article['title'], article['published'])
                 #bot_sendtext('*Форвард нового сообщения из Фейсбука:*\n\n' + text_of_article + article['link']) #эта строка была сокращенной версией, без учета излишне линных сообщений
                 full_text = '*Форвард нового сообщения из Фейсбука:*\n\n' + text_of_article + article['link']
-                full_text = full_text.replace("#", " %23")
-                # шестнадцатеричный код символа # = 0023, т.е. для отображения '\x23'.
+                full_text = full_text.replace("#", " %23")  # шестнадцатеричный код символа # = 0023, т.е. для отображения '\x23'.
                 if len(full_text) > 4096:
                     full_text_fix= len(full_text)
                     while full_text_fix > 4096:
