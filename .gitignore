@@ -3,6 +3,8 @@ rss.sqlite
 venv
 config_RSS_FB
 config_RSS_FB.py
+my_config_kadry
+my_config_kadry.py
 
 #==== далее - это автоматическая настройка с ГитХаба
 

@@ -1,11 +1,7 @@
 #!/usr/bin/python3
 # Скрипт для считывания данных из RSS в канал Телеграм
 # Разработка Георгия Сухадольского https://sukhadol.ru
-# Создано на основе идеи by Yevgeniy Goncharov, https://sys-adm.in
-# Описание исходных блоков на основе sqlite: https://sys-adm.in/programming/805-rss-fider-na-python-s-opravkoj-uvedomlenij-v-telegram.html
 
-
-# Imports
 import requests
 import feedparser
 import os
@@ -17,8 +13,14 @@ import psycopg2
 from psycopg2 import Error
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT # возможно эта строка только для локальной работы
 from requests.models import ProtocolError
-
 from pyquery import PyQuery as pq
+
+import vk_api
+from vk_api import VkApi
+
+#=================================================================
+# ВВОДНАЯ ЧАСТЬ
+#=================================================================
 
 # Проверка мы работаем на Heroku или локально, сделано собственной переменной в оболочке Heroku 
 if 'We_are_on_Heroku' in os.environ:
@@ -34,8 +36,15 @@ if Run_On_Heroku:
     #port_for_postgres = int(os.environ.get("PORT", 5000))
     #host_for_postgres="localhost" # !!!! что-то надо править?!!
     print('===================== НАЧАЛИ...Работаем на Хероку')
+    # теперь переменные для работы с ВК
+    groupId_in_VK = os.environ.get("groupId_in_VK")
+    token_VK_servisny=os.environ.get("token_VK_servisny") #Сервисный ключ доступа в приложении ВК
+    # ниже две переменные - пока для тестового канала
+    Token_bot_for_communikate_VK = os.environ.get("Token_bot_for_communikate_VK")
+    ChatID_Telegram_from_VK = os.environ.get("ChatID_Telegram_from_VK")
+
 else:
-    from config_RSS_FB import *
+    from 02_my_config import *
     port_for_postgres="5432"
     host_for_postgres="localhost"
     print('...Работаем локально')
@@ -67,6 +76,10 @@ headers = {
 proxies = {
 }
 
+#=================================================================
+# СОЗДАНИЕ ТАБЛИЦ БАЗ ДАННЫХ
+#=================================================================
+
 # Создание базы данных
 if Run_On_Heroku:
     #отсюда https://devcenter.heroku.com/articles/heroku-postgresql#connecting-in-python инструкция как подключиться к базе данных
@@ -79,7 +92,7 @@ else:
                                     port = port_for_postgres)
         connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         cursor = connection.cursor()
-        sql_create_database = 'create database postgres_baze_from_rss'
+        sql_create_database = 'create database postgres_baze_from_rss' # база единая и для ФБ и для ВК
         cursor.execute(sql_create_database)
         print('Создали новую базу')
     except (Exception, Error) as error:
@@ -91,7 +104,7 @@ else:
             print("Создание базы данных: Соединение с PostgreSQL закрыто") 
 
 
-# Создание таблицы в базе данных 
+# Создание таблицы по получению RSS с ФБ в базе данных 
 try:
     if Run_On_Heroku:
     #отсюда https://devcenter.heroku.com/articles/heroku-postgresql#connecting-in-python инструкция как подключиться к базе данных
@@ -113,7 +126,7 @@ try:
                                      port=port_for_postgres,
                                      database="postgres_baze_from_rss")
     cursor = connection.cursor()
-    # SQL-запрос для создания новой таблицы, добавил опцию ..if not exists..
+    # SQL-запрос для создания новой таблицы импорта RSS из ФБ, добавил опцию ..if not exists..
     create_table_query = '''CREATE TABLE if not exists Table_Data_From_FB_RSS_kadry
                           (ID_time timestamp PRIMARY KEY     NOT NULL,
                           title_of_article       TEXT    NOT NULL,
@@ -121,15 +134,46 @@ try:
     # Выполнение команды: создает новую таблицу
     cursor.execute(create_table_query)
     connection.commit()
-    print("Таблица успешно создана в PostgreSQL ИЛИ проверено ее уже наличие")
+    print("Таблица Table_Data_From_FB_RSS_kadry импорта RSS из ФБ успешно создана в PostgreSQL ИЛИ проверено ее уже наличие")
 except (Exception, Error) as error:
     print("Ошибка при работе с PostgreSQL-133: ", error)
 finally:
     if connection:
         cursor.close()
         connection.close()
-        print("Создание таблицы: Соединение с PostgreSQL закрыто\n")
+        print("Создание таблицы Table_Data_From_FB_RSS_kadry: Соединение с PostgreSQL закрыто\n")
 
+# Создание таблицы по получению постов из VK 
+try:
+    if Run_On_Heroku:
+        connection = psycopg2.connect(DATABASE_URL, sslmode='require')
+    else:
+        connection = psycopg2.connect(user="postgres",
+                                     password=Password_to_local_PostgreSQL,
+                                     host=host_for_postgres,
+                                     port=port_for_postgres,
+                                     database="postgres_baze_from_rss")
+    cursor = connection.cursor()
+    # SQL-запрос для создания новой таблицы получения постов из VK
+    create_table_query = '''CREATE TABLE if not exists Table_Data_From_VK_to_telegram
+                          (ID_time timestamp PRIMARY KEY     NOT NULL,
+                          id_of_article       TEXT    NOT NULL,
+                          title_of_article       TEXT    NOT NULL); '''
+    # Выполнение команды: создает новую таблицу Table_Data_From_VK_to_telegram
+    cursor.execute(create_table_query)
+    connection.commit()
+    print("Таблица Table_Data_From_VK_to_telegram получения данных из VK успешно создана в PostgreSQL ИЛИ проверено ее уже наличие")
+except (Exception, Error) as error:
+    print("Ошибка при работе с PostgreSQL-133: ", error)
+finally:
+    if connection:
+        cursor.close()
+        connection.close()
+        print("Создание таблицы Table_Data_From_VK_to_telegram: Соединение с PostgreSQL закрыто\n")
+
+#=================================================================
+# АНАЛИЗ ДАННЫХ В БАЗАХ
+#=================================================================
 
 # Пишем процедуры проверки наличия постов в БД Table_Data_From_FB_RSS_kadry:
 def article_NOT_in_BazeFromRSS(article_title, article_date):
@@ -159,7 +203,7 @@ def article_NOT_in_BazeFromRSS(article_title, article_date):
             print("=>Проверки наличия постов в БД: Соединение с PostgreSQL закрыто")
 
 # Добавление постов в таблицу Table_Data_From_FB_RSS_kadry:
-def add_article_to_db(article_title, article_date):
+def add_article_to_db_from_FB(article_title, article_date):
     try:
         if Run_On_Heroku:
             connection = psycopg2.connect(DATABASE_URL, sslmode='require')
@@ -182,14 +226,68 @@ def add_article_to_db(article_title, article_date):
             connection.close()
             print("...Добавление постов: Соединение с PostgreSQL закрыто")
 
-# Процедура отправки сообщения Телеграм боту:
-def bot_sendtext(bot_message):
+# Пишем процедуры проверки наличия постов в БД Table_Data_From_VK_to_telegram:
+def article_NOT_in_BazeFromVK(article_id):
     try:
-        #bot_message = urllib.parse.quote(bot_message)
+        if Run_On_Heroku:
+            connection = psycopg2.connect(DATABASE_URL, sslmode='require')
+        else:
+            connection = psycopg2.connect(user="postgres",
+                                          password=Password_to_local_PostgreSQL,
+                                          host=host_for_postgres,
+                                          port=port_for_postgres,
+                                          database="postgres_baze_from_rss")
+        cursor = connection.cursor()
+        # Получить результат выборки наличия идентичных постов в базе
+        postgreSQL_select_Query = "SELECT * from Table_Data_From_VK_to_telegram WHERE id_of_article=%s"     # %s - означает принятый аргумент, n$ - позиция
+        cursor.execute(postgreSQL_select_Query, (article_id))
+        if not cursor.fetchall():
+            return True
+        else:
+            return False
+    except (Exception, Error) as error:
+        print("Ошибка при работе с PostgreSQL-143", error)
+    finally:
+        if connection:
+            cursor.close()
+            connection.close()
+            print("=>Проверки наличия постов в БД: Соединение с PostgreSQL закрыто")
+
+# Добавление постов в таблицу Table_Data_From_VK_to_telegram:
+def add_article_to_db_from_VK(article_id):
+    try:
+        if Run_On_Heroku:
+            connection = psycopg2.connect(DATABASE_URL, sslmode='require')
+        else:
+            connection = psycopg2.connect(user="postgres",
+                                          password=Password_to_local_PostgreSQL,
+                                          host=host_for_postgres,
+                                          port=port_for_postgres,
+                                          database="postgres_baze_from_rss")
+        cursor = connection.cursor()
+        postgreSQL_to_ins_Query = "INSERT INTO Table_Data_From_VK_to_telegram VALUES (now(),%s,%s)"
+        cursor.execute(postgreSQL_to_ins_Query, (article_id, article_title))
+        connection.commit()
+        print('...=> добавили пост в базу')
+    except (Exception, Error) as error:
+        print("Ошибка при работе с PostgreSQL-185", error)
+    finally:
+        if connection:
+            cursor.close()
+            connection.close()
+            print("...Добавление постов: Соединение с PostgreSQL закрыто")
+
+
+
+#=================================================================
+# РАБОТА С RSS из FACEBOOK
+#=================================================================
+
+# Процедура отправки сообщения Телеграм боту:
+def bot_sendtext_to_telega_kadry(bot_message):
+    try:
         send_text = 'https://api.telegram.org/bot' + Token_bot_for_RSSfrom_FB + '/sendMessage?chat_id=' + ChatID_for_RSSfrom_FB + '&parse_mode=Markdown&text=' + bot_message
         requests.get(send_text, proxies=proxies, headers=headers)
-        #print('...send_text= ')
-        #print(send_text)
     except (Exception, Error) as error:
         print("Какая-то ошибка - 196: ", error)
 
@@ -236,11 +334,9 @@ def read_article_feed(feed):
             #else:
             #    print('ничего не делаем') """
 
-            #print('text_of_article = ')
-            #print(text_of_article)
             if article_NOT_in_BazeFromRSS(article['title'], article['published']):
-                add_article_to_db(article['title'], article['published'])
-                #bot_sendtext('*Форвард нового сообщения из Фейсбука:*\n\n' + text_of_article + article['link']) #эта строка была сокращенной версией, без учета излишне линных сообщений
+                add_article_to_db_from_FB(article['title'], article['published'])
+                #bot_sendtext_to_telega_kadry('*Форвард нового сообщения из Фейсбука:*\n\n' + text_of_article + article['link']) #эта строка была сокращенной версией, без учета излишне линных сообщений
                 full_text = '*Форвард нового сообщения из Фейсбука:*\n\n' + text_of_article + article['link']
                 full_text = full_text.replace("#", " %23")  # шестнадцатеричный код символа # = 0023, т.е. для отображения '\x23'.
                 if len(full_text) > 4096:
@@ -249,13 +345,13 @@ def read_article_feed(feed):
                         first_part_text = full_text[0:4096-35]
                         point_end_of_text = first_part_text.rfind("\n")  
                         first_part_to_send = first_part_text[0:point_end_of_text]               
-                        bot_sendtext(first_part_to_send + '\n_(продолжение следует...)_')
+                        bot_sendtext_to_telega_kadry(first_part_to_send + '\n_(продолжение следует...)_')
                         full_text = '\n_(...продолжение)_\n' + full_text[point_end_of_text:len(full_text)]
                         full_text_fix= len(full_text)
                     else:
-                        bot_sendtext(full_text)
+                        bot_sendtext_to_telega_kadry(full_text)
                 else:
-                    bot_sendtext(full_text)
+                    bot_sendtext_to_telega_kadry(full_text)
 
                 print('...добавляем в базу пост с заголовком= ')
                 print(article['title'])
@@ -276,7 +372,9 @@ def spin_feds():
     except (Exception, Error) as error:
         print("Какая-то ошибка - 241: ", error)
 
+#=================================================================
 # Получение данных, просто для себя чтобы узнать что хранится в таблице Table_Data_From_FB_RSS_kadry.
+#=================================================================
 def get_posts():
     try:
         if Run_On_Heroku:
@@ -306,11 +404,69 @@ def get_posts():
             connection.close()
             print("Получение данных: Соединение с PostgreSQL закрыто\n")
 
+#=================================================================
+# РАБОТА С ТЕЛЕГРАМ
+#=================================================================
+
+# Процедура отправки сообщения в канал Телеграм из ВК (после тестирования можно поставить токен ):
+def bot_sendtext_to_telega_from_VK(bot_message):
+    try:
+        send_text = 'https://api.telegram.org/bot' + Token_bot_for_communikate_VK + '/sendMessage?chat_id=' + ChatID_Telegram_from_VK + '&parse_mode=Markdown&text=' + bot_message
+        requests.get(send_text, proxies=proxies, headers=headers)
+    except (Exception, Error) as error:
+        print("Какая-то ошибка - 196: ", error)
+
+# Получение постов из сообщества ВК.  
+def grabber_from_VK():
+    import time
+    my_offset = 0    # начальный индекс поиска публикаций
+    my_count = 2   #шаг продвижения индекса поиска публикаций
+    try:
+        for i_tmp in range(0,1): # т.е. фактически опросим страницу (сообщество) 4 раза по count публикаций, боле чем достаточно
+            params = {'owner_id':groupId_in_VK,'offset':my_offset,'count':my_count,'filter':'all','extended':0,'access_token':token_VK_servisny,'v':5.103}         #формирование списка параметров запроса к api
+            posts = requests.get('https://api.vk.com/method/wall.get',params)         #отправка запроса с заданными параметрами
+            posts_number = len(posts.json()['response']['items']) # число новых постов, полученных в текущем проходе
+            for j in range(posts_number-1,-1,-1): #теперь будем обрабатывать и выгружать все полученные из ВК посты, начиная с более старых (ранних)
+                #print('... элемент по порядку J=' + str(j) + '   count=' + str(my_count))
+                #print('id=' + str(posts.json()['response']['items'][j]['id']) + '  text=' + str(posts.json()['response']['items'][j]['text']))
+
+                if article_NOT_in_BazeFromVK(posts.json()['response']['items'][j]['id']):
+                    add_article_to_db_from_VK(posts.json()['response']['items'][j]['id'], posts.json()['response']['items'][j]['text'])
+                    full_text = '*Форвард нового сообщения из ВК:*\n\n' + str(posts.json()['response']['items'][j]['text']) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'\_'+str(posts.json()['response']['items'][j]['id'])
+                    #print('...full_text = ' + full_text)
+                    full_text = full_text.replace("#", " %23")  # шестнадцатеричный код символа # = 0023, т.е. для отображения '\x23'.
+                    if len(full_text) > 4096:
+                        full_text_fix= len(full_text)
+                        while full_text_fix > 4096:
+                            first_part_text = full_text[0:4096-35]
+                            point_end_of_text = first_part_text.rfind("\n")  
+                            first_part_to_send = first_part_text[0:point_end_of_text]               
+                            bot_sendtext_to_telega_from_VK(first_part_to_send + '\n_(продолжение следует...)_')
+                            full_text = '\n_(...продолжение)_\n' + full_text[point_end_of_text:len(full_text)]
+                            full_text_fix= len(full_text)
+                        else:
+                            bot_sendtext_to_telega_from_VK(full_text)
+                    else:
+                        bot_sendtext_to_telega_from_VK(full_text)
+                    print('...добавляем в базу пост с содержанием= ')
+                    print(posts.json()['response']['items'][j]['text'])
+                else:
+                    print('...добавлять и публиковать данный пост не надо, уже есть, речь о посте=')
+                    print(posts.json()['response']['items'][j]['text'])
+            my_offset += my_count   # наращивание шага продвижения по публикациям, чтобы на всякий случай пройти несколько циклов, если надо
+            time.sleep(2)        # принудительная «приостановка» работы программы, для соблюдения требований api по количеству запрсов
+    except (Exception, Error) as error:
+        print("Какая-то ошибка - 231: ", error)
+#=================================================================
+# ЗАПУСК
+#=================================================================
+
 # Запускаем все это дело:
 if Run_On_Heroku: #вариант для Heroku
     if __name__ == '__main__':
         spin_feds()
         get_posts()
+        grabber_from_VK()
         if connection:
             cursor.close()
             connection.close()
@@ -318,6 +474,7 @@ else: #вариант для локального
     if __name__ == '__main__':
         spin_feds()
         get_posts()
+        grabber_from_VK()
         if connection:
             cursor.close()
             connection.close()

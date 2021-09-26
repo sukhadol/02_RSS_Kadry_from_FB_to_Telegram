@@ -1,1 +1,1 @@
-web: python RSS_from_FB.py
+web: python RSS_from_FB_VK.py
