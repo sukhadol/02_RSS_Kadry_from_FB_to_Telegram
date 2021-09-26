@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# Скрипт для считывания данных из RSS в канал Телеграм
+# Скрипт для считывания данных из RSS в канал Телеграм и обмена информацией с ВК
 # Разработка Георгия Сухадольского https://sukhadol.ru
 
 import requests
@@ -97,7 +97,7 @@ else:
         cursor.execute(sql_create_database)
         print('Создали новую базу')
     except (Exception, Error) as error:
-        print("Ошибка при работе с PostgreSQL", error)
+        print("Ошибка при работе с PostgreSQL - стр.100", error)
     finally:
         if connection:
             cursor.close()
@@ -137,7 +137,7 @@ try:
     connection.commit()
     print("Таблица Table_Data_From_FB_RSS_kadry импорта RSS из ФБ успешно создана в PostgreSQL ИЛИ проверено ее уже наличие")
 except (Exception, Error) as error:
-    print("Ошибка при работе с PostgreSQL-133: ", error)
+    print("Ошибка при работе с PostgreSQL-140: ", error)
 finally:
     if connection:
         cursor.close()
@@ -165,7 +165,7 @@ try:
     connection.commit()
     print("Таблица Table_Data_From_VK_to_telegram получения данных из VK успешно создана в PostgreSQL ИЛИ проверено ее уже наличие")
 except (Exception, Error) as error:
-    print("Ошибка при работе с PostgreSQL-133: ", error)
+    print("Ошибка при работе с PostgreSQL-168: ", error)
 finally:
     if connection:
         cursor.close()
@@ -196,7 +196,7 @@ def article_NOT_in_BazeFromRSS(article_title, article_date):
         else:
             return False
     except (Exception, Error) as error:
-        print("Ошибка при работе с PostgreSQL-161", error)
+        print("Ошибка при работе с PostgreSQL-199", error)
     finally:
         if connection:
             cursor.close()
@@ -220,7 +220,7 @@ def add_article_to_db_from_FB(article_title, article_date):
         connection.commit()
         print('...=> добавили пост в базу')
     except (Exception, Error) as error:
-        print("Ошибка при работе с PostgreSQL-185", error)
+        print("Ошибка при работе с PostgreSQL-223", error)
     finally:
         if connection:
             cursor.close()
@@ -247,7 +247,7 @@ def article_NOT_in_BazeFromVK(article_id):
         else:
             return False
     except (Exception, Error) as error:
-        print("Ошибка при работе с PostgreSQL-143", error)
+        print("Ошибка при работе с PostgreSQL-250", error)
     finally:
         if connection:
             cursor.close()
@@ -255,7 +255,7 @@ def article_NOT_in_BazeFromVK(article_id):
             print("=>Проверки наличия постов в БД: Соединение с PostgreSQL закрыто")
 
 # Добавление постов в таблицу Table_Data_From_VK_to_telegram:
-def add_article_to_db_from_VK(article_id):
+def add_article_to_db_from_VK(article_id, article_title):
     try:
         if Run_On_Heroku:
             connection = psycopg2.connect(DATABASE_URL, sslmode='require')
@@ -271,7 +271,7 @@ def add_article_to_db_from_VK(article_id):
         connection.commit()
         print('...=> добавили пост в базу')
     except (Exception, Error) as error:
-        print("Ошибка при работе с PostgreSQL-185", error)
+        print("Ошибка при работе с PostgreSQL-274", error)
     finally:
         if connection:
             cursor.close()
@@ -290,7 +290,7 @@ def bot_sendtext_to_telega_kadry(bot_message):
         send_text = 'https://api.telegram.org/bot' + Token_bot_for_RSSfrom_FB + '/sendMessage?chat_id=' + ChatID_for_RSSfrom_FB + '&parse_mode=Markdown&text=' + bot_message
         requests.get(send_text, proxies=proxies, headers=headers)
     except (Exception, Error) as error:
-        print("Какая-то ошибка - 196: ", error)
+        print("Какая-то ошибка - 293: ", error)
 
 # Процедура получения фида, проверки его наличия в БД:
 def read_article_feed(feed):
@@ -361,7 +361,7 @@ def read_article_feed(feed):
                 print(article['title'])
 #               print(text_of_article)
     except (Exception, Error) as error:
-        print("Какая-то ошибка - 231: ", error)
+        print("Какая-то ошибка - 364: ", error)
 
 # Проверяем каждый фид из списка:
 def spin_feds():
@@ -371,7 +371,7 @@ def spin_feds():
             #print(x)
             read_article_feed(x)
     except (Exception, Error) as error:
-        print("Какая-то ошибка - 241: ", error)
+        print("Какая-то ошибка - 374: ", error)
 
 #=================================================================
 # Получение данных, просто для себя чтобы узнать что хранится в таблице Table_Data_From_FB_RSS_kadry.
@@ -393,12 +393,12 @@ def get_posts():
 
         numb_days = 14 # глубина выборки базы для публикации. Увы, в следующей строчке автоматом не подхватилось, в причинах разбираться не стал, указал вручную
         cursor.execute("SELECT title_of_article, Date_of_article from Table_Data_From_FB_RSS_kadry WHERE (EXTRACT('DAY' FROM (now() - to_timestamp(Date_of_article, 'Dy DD Mon YYYY'))))<14")
-        print("======================Результат базы данных за " + str(numb_days) + " последних дней =") # вернем записи поштучно
+        print("======================Результат базы данных RSS из Facebook за " + str(numb_days) + " последних дней =") # вернем записи поштучно
         for result in cursor:
             print(str(result))
 
     except (Exception, Error) as error:
-        print("Ошибка при работе с PostgreSQL", error)
+        print("Ошибка при работе с PostgreSQL-401", error)
     finally:
         if connection:
             cursor.close()
@@ -415,7 +415,7 @@ def bot_sendtext_to_telega_from_VK(bot_message):
         send_text = 'https://api.telegram.org/bot' + Token_bot_for_communikate_VK + '/sendMessage?chat_id=' + ChatID_Telegram_from_VK + '&parse_mode=Markdown&text=' + bot_message
         requests.get(send_text, proxies=proxies, headers=headers)
     except (Exception, Error) as error:
-        print("Какая-то ошибка - 196: ", error)
+        print("Какая-то ошибка - 418: ", error)
 
 # Получение постов из сообщества ВК.  
 def grabber_from_VK():
@@ -430,8 +430,8 @@ def grabber_from_VK():
                 #print('... элемент по порядку J=' + str(j) + '   count=' + str(my_count))
                 #print('id=' + str(posts.json()['response']['items'][j]['id']) + '  text=' + str(posts.json()['response']['items'][j]['text']))
 
-                if article_NOT_in_BazeFromVK(posts.json()['response']['items'][j]['id']):
-                    add_article_to_db_from_VK(posts.json()['response']['items'][j]['id'], posts.json()['response']['items'][j]['text'])
+                if article_NOT_in_BazeFromVK(str(posts.json()['response']['items'][j]['id'])):
+                    add_article_to_db_from_VK(str(posts.json()['response']['items'][j]['id']), posts.json()['response']['items'][j]['text'])
                     full_text = '*Форвард нового сообщения из ВК:*\n\n' + str(posts.json()['response']['items'][j]['text']) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'\_'+str(posts.json()['response']['items'][j]['id'])
                     #print('...full_text = ' + full_text)
                     full_text = full_text.replace("#", " %23")  # шестнадцатеричный код символа # = 0023, т.е. для отображения '\x23'.
@@ -456,7 +456,7 @@ def grabber_from_VK():
             my_offset += my_count   # наращивание шага продвижения по публикациям, чтобы на всякий случай пройти несколько циклов, если надо
             time.sleep(2)        # принудительная «приостановка» работы программы, для соблюдения требований api по количеству запрсов
     except (Exception, Error) as error:
-        print("Какая-то ошибка - 231: ", error)
+        print("Какая-то ошибка - 459: ", error)
 #=================================================================
 # ЗАПУСК
 #=================================================================
@@ -466,6 +466,7 @@ if Run_On_Heroku: #вариант для Heroku
     if __name__ == '__main__':
         spin_feds()
         get_posts()
+        print("===================== теперь обработка ВК")
         grabber_from_VK()
         if connection:
             cursor.close()
