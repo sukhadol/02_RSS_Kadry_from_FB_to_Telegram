@@ -242,8 +242,8 @@ def article_NOT_in_BazeFromVK(article_id):
         cursor = connection.cursor()
         print('...000243')
         # Получить результат выборки наличия идентичных постов в базе
-#        postgreSQL_select_Query_to_VK = "SELECT * from Table_Data_From_VK_to_telegram WHERE id_of_article=%s"     # %s - означает принятый аргумент, n$ - позиция
-        postgreSQL_select_Query_to_VK = "SELECT * from Table_Data_From_VK_to_telegram WHERE id_of_article='id_16'"     # %s - означает принятый аргумент, n$ - позиция
+        postgreSQL_select_Query_to_VK = "SELECT * from Table_Data_From_VK_to_telegram WHERE id_of_article=%s"     # %s - означает принятый аргумент, n$ - позиция
+#        postgreSQL_select_Query_to_VK = "SELECT * from Table_Data_From_VK_to_telegram WHERE id_of_article='id_16'"     # %s - означает принятый аргумент, n$ - позиция
         print('...000246')
         print('... article_id=' + article_id)
         cursor.execute(postgreSQL_select_Query_to_VK, article_id)
@@ -436,7 +436,8 @@ def grabber_from_VK():
             for j in range(posts_number-1,-1,-1): #теперь будем обрабатывать и выгружать все полученные из ВК посты, начиная с более старых (ранних)
                 #print('... элемент по порядку J=' + str(j) + '   count=' + str(my_count))
                 #print('id=' + str(posts.json()['response']['items'][j]['id']) + '  text=' + str(posts.json()['response']['items'][j]['text']))
-                elem_id = 'id_' + str(posts.json()['response']['items'][j]['id']) 
+                #elem_id = 'id_' + str(posts.json()['response']['items'][j]['id'])
+                elem_id = str(posts.json()['response']['items'][j]['id']) 
                 print('...проверяем элемент id = ' + elem_id)
 
 #                if article_NOT_in_BazeFromVK(str(posts.json()['response']['items'][j]['id'])):
