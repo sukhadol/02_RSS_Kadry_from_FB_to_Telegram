@@ -421,7 +421,7 @@ def bot_sendtext_to_telega_from_VK(bot_message):
 # Получение постов из сообщества ВК.  
 def grabber_from_VK():
     my_offset = 0    # начальный индекс поиска публикаций
-    my_count = 2   #шаг продвижения индекса поиска публикаций
+    my_count = 4   #шаг продвижения индекса поиска публикаций
     try:
         for i_tmp in range(0,1): # т.е. фактически опросим страницу (сообщество) 4 раза по count публикаций, боле чем достаточно
             params = {'owner_id':groupId_in_VK,'offset':my_offset,'count':my_count,'filter':'all','extended':0,'access_token':token_VK_servisny,'v':5.103}         #формирование списка параметров запроса к api
@@ -435,27 +435,32 @@ def grabber_from_VK():
 #                print('...проверяем элемент id = ' + elem_id)
 
                 if article_NOT_in_BazeFromVK(str(posts.json()['response']['items'][j]['id'])):
-#                if article_NOT_in_BazeFromVK(elem_id):
-#                    print('... зашли....')
-                    add_article_to_db_from_VK(str(posts.json()['response']['items'][j]['id']), posts.json()['response']['items'][j]['text'])
-                    full_text = '*Форвард нового сообщения из ВК:*\n\n' + str(posts.json()['response']['items'][j]['text']) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'\_'+str(posts.json()['response']['items'][j]['id'])
-                    #print('...full_text = ' + full_text)
-                    full_text = full_text.replace("#", " %23")  # шестнадцатеричный код символа # = 0023, т.е. для отображения '\x23'.
-                    if len(full_text) > 4096:
-                        full_text_fix= len(full_text)
-                        while full_text_fix > 4096:
-                            first_part_text = full_text[0:4096-35]
-                            point_end_of_text = first_part_text.rfind("\n")  
-                            first_part_to_send = first_part_text[0:point_end_of_text]               
-                            bot_sendtext_to_telega_from_VK(first_part_to_send + '\n_(продолжение следует...)_')
-                            full_text = '\n_(...продолжение)_\n' + full_text[point_end_of_text:len(full_text)]
+                    #еще проверяем на зацикливание форвардов из разных источников. 
+                    elem_txt=(posts.json()['response']['items'][j]['text']) 
+                    if(elem_txt.startswith(('Форвард нового сообщения из Фейсбука', 'Форвард нового сообщения из Телеграма'))):
+                        print('...публиковать данный пост не надо, это уже и так форвард. Но чтобы не сбиваться - надо добавить его в базу. Речь о посте=')
+                        print(posts.json()['response']['items'][j]['text'])
+                        add_article_to_db_from_VK(str(posts.json()['response']['items'][j]['id']), posts.json()['response']['items'][j]['text'])
+                    else:
+                        add_article_to_db_from_VK(str(posts.json()['response']['items'][j]['id']), posts.json()['response']['items'][j]['text'])
+                        full_text = '*Форвард нового сообщения из ВКонтакте:*\n\n' + str(posts.json()['response']['items'][j]['text']) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'\_'+str(posts.json()['response']['items'][j]['id'])
+                        #print('...full_text = ' + full_text)
+                        full_text = full_text.replace("#", " %23")  # шестнадцатеричный код символа # = 0023, т.е. для отображения '\x23'.
+                        if len(full_text) > 4096:
                             full_text_fix= len(full_text)
+                            while full_text_fix > 4096:
+                                first_part_text = full_text[0:4096-35]
+                                point_end_of_text = first_part_text.rfind("\n")  
+                                first_part_to_send = first_part_text[0:point_end_of_text]               
+                                bot_sendtext_to_telega_from_VK(first_part_to_send + '\n_(продолжение следует...)_')
+                                full_text = '\n_(...продолжение)_\n' + full_text[point_end_of_text:len(full_text)]
+                                full_text_fix= len(full_text)
+                            else:
+                                bot_sendtext_to_telega_from_VK(full_text)
                         else:
                             bot_sendtext_to_telega_from_VK(full_text)
-                    else:
-                        bot_sendtext_to_telega_from_VK(full_text)
-                    print('...добавляем в базу пост с содержанием= ')
-                    print(posts.json()['response']['items'][j]['text'])
+                        print('...добавляем в базу пост с содержанием= ')
+                        print(posts.json()['response']['items'][j]['text'])
                 else:
                     print('...добавлять и публиковать данный пост не надо, уже есть, речь о посте=')
                     print(posts.json()['response']['items'][j]['text'])
