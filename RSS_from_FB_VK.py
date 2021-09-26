@@ -11,7 +11,6 @@ import random
 
 import psycopg2
 from psycopg2 import Error
-from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT # возможно эта строка только для локальной работы
 from requests.models import ProtocolError
 from pyquery import PyQuery as pq
 
@@ -44,7 +43,8 @@ if Run_On_Heroku:
     ChatID_Telegram_from_VK = os.environ.get("ChatID_Telegram_from_VK")
 
 else:
-    from 02_my_config import *
+    from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT # эта строка похоже нужна только для локальной работы
+    from my_config_kadry import *
     port_for_postgres="5432"
     host_for_postgres="localhost"
     print('...Работаем локально')
