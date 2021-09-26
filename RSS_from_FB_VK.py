@@ -16,6 +16,7 @@ from pyquery import PyQuery as pq
 
 import vk_api
 from vk_api import VkApi
+import time
 
 #=================================================================
 # ВВОДНАЯ ЧАСТЬ
@@ -418,7 +419,6 @@ def bot_sendtext_to_telega_from_VK(bot_message):
 
 # Получение постов из сообщества ВК.  
 def grabber_from_VK():
-    import time
     my_offset = 0    # начальный индекс поиска публикаций
     my_count = 2   #шаг продвижения индекса поиска публикаций
     try:
