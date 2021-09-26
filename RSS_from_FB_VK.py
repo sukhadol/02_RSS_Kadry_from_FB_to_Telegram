@@ -429,8 +429,12 @@ def grabber_from_VK():
             for j in range(posts_number-1,-1,-1): #теперь будем обрабатывать и выгружать все полученные из ВК посты, начиная с более старых (ранних)
                 #print('... элемент по порядку J=' + str(j) + '   count=' + str(my_count))
                 #print('id=' + str(posts.json()['response']['items'][j]['id']) + '  text=' + str(posts.json()['response']['items'][j]['text']))
+                elem_id = str(posts.json()['response']['items'][j]['id']) 
+                print('...проверяем элемент id = ' + elem_id)
 
-                if article_NOT_in_BazeFromVK(str(posts.json()['response']['items'][j]['id'])):
+#                if article_NOT_in_BazeFromVK(str(posts.json()['response']['items'][j]['id'])):
+                if article_NOT_in_BazeFromVK(elem_id):
+                    print('... зашли....')
                     add_article_to_db_from_VK(str(posts.json()['response']['items'][j]['id']), posts.json()['response']['items'][j]['text'])
                     full_text = '*Форвард нового сообщения из ВК:*\n\n' + str(posts.json()['response']['items'][j]['text']) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'\_'+str(posts.json()['response']['items'][j]['id'])
                     #print('...full_text = ' + full_text)
