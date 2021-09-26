@@ -355,7 +355,7 @@ def read_article_feed(feed):
                 else:
                     bot_sendtext_to_telega_kadry(full_text)
 
-                print('...добавляем в базу пост с заголовком= ')
+                print('...публикуем и добавляем в базу пост с заголовком= ')
                 print(article['title'])
             else:
                 print('...добавлять и публиковать данный пост не надо, уже есть, речь о посте=')
@@ -459,7 +459,7 @@ def grabber_from_VK():
                                 bot_sendtext_to_telega_from_VK(full_text)
                         else:
                             bot_sendtext_to_telega_from_VK(full_text)
-                        print('...добавляем в базу пост с содержанием= ')
+                        print('...публикуем и добавляем в базу пост с содержанием= ')
                         print(posts.json()['response']['items'][j]['text'])
                 else:
                     print('...добавлять и публиковать данный пост не надо, уже есть, речь о посте=')
