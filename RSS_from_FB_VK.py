@@ -238,10 +238,14 @@ def article_NOT_in_BazeFromVK(article_id):
                                           host=host_for_postgres,
                                           port=port_for_postgres,
                                           database="postgres_baze_from_rss")
+        print('...000241')
         cursor = connection.cursor()
+        print('...000243')
         # Получить результат выборки наличия идентичных постов в базе
         postgreSQL_select_Query = "SELECT * from Table_Data_From_VK_to_telegram WHERE id_of_article=%s"     # %s - означает принятый аргумент, n$ - позиция
+        print('...000246')
         cursor.execute(postgreSQL_select_Query, (article_id))
+        print('...000248')
         if not cursor.fetchall():
             return True
         else:
