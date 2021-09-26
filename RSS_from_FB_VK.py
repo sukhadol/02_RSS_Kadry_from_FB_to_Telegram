@@ -241,13 +241,8 @@ def article_NOT_in_BazeFromVK(article_id):
         cursor = connection.cursor()
         # Получить результат выборки наличия идентичных постов в базе
         postgreSQL_select_Query_to_VK = "SELECT * from Table_Data_From_VK_to_telegram WHERE id_of_article=%s"     # %s - означает принятый аргумент, n$ - позиция
-#        postgreSQL_select_Query_to_VK = "SELECT * from Table_Data_From_VK_to_telegram WHERE id_of_article='id_16'"     # %s - означает принятый аргумент, n$ - позиция
-        print('...000246' + '... article_id=' + article_id)
         cursor.execute(postgreSQL_select_Query_to_VK, (str(article_id), ))
-
         #cursor.execute("SELECT * from Table_Data_From_VK_to_telegram WHERE id_of_article=%s", (str(article_id), ))
-        #cursor.execute(postgreSQL_select_Query_to_VK)
-        print('...000248')
         if not cursor.fetchall():
             return True
         else:
@@ -436,12 +431,12 @@ def grabber_from_VK():
                 #print('... элемент по порядку J=' + str(j) + '   count=' + str(my_count))
                 #print('id=' + str(posts.json()['response']['items'][j]['id']) + '  text=' + str(posts.json()['response']['items'][j]['text']))
                 #elem_id = 'id_' + str(posts.json()['response']['items'][j]['id'])
-                elem_id = str(posts.json()['response']['items'][j]['id']) 
-                print('...проверяем элемент id = ' + elem_id)
+#                elem_id = str(posts.json()['response']['items'][j]['id']) 
+#                print('...проверяем элемент id = ' + elem_id)
 
-#                if article_NOT_in_BazeFromVK(str(posts.json()['response']['items'][j]['id'])):
-                if article_NOT_in_BazeFromVK(elem_id):
-                    print('... зашли....')
+                if article_NOT_in_BazeFromVK(str(posts.json()['response']['items'][j]['id'])):
+#                if article_NOT_in_BazeFromVK(elem_id):
+#                    print('... зашли....')
                     add_article_to_db_from_VK(str(posts.json()['response']['items'][j]['id']), posts.json()['response']['items'][j]['text'])
                     full_text = '*Форвард нового сообщения из ВК:*\n\n' + str(posts.json()['response']['items'][j]['text']) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'\_'+str(posts.json()['response']['items'][j]['id'])
                     #print('...full_text = ' + full_text)
