@@ -189,8 +189,8 @@ def article_NOT_in_BazeFromRSS(article_title, article_date):
                                           database="postgres_baze_from_rss")
         cursor = connection.cursor()
         # Получить результат выборки наличия идентичных постов в базе
-        postgreSQL_select_Query = "SELECT * from Table_Data_From_FB_RSS_kadry WHERE title_of_article=%s AND Date_of_article=%s"     # %s - означает принятый аргумент, n$ - позиция
-        cursor.execute(postgreSQL_select_Query, (article_title, article_date))
+        postgreSQL_select_Query_RSS = "SELECT * from Table_Data_From_FB_RSS_kadry WHERE title_of_article=%s AND Date_of_article=%s"     # %s - означает принятый аргумент, n$ - позиция
+        cursor.execute(postgreSQL_select_Query_RSS, (article_title, article_date))
         if not cursor.fetchall():
             return True
         else:
@@ -242,12 +242,12 @@ def article_NOT_in_BazeFromVK(article_id):
         cursor = connection.cursor()
         print('...000243')
         # Получить результат выборки наличия идентичных постов в базе
-        postgreSQL_select_Query = "SELECT * from Table_Data_From_VK_to_telegram WHERE id_of_article=%s"     # %s - означает принятый аргумент, n$ - позиция
-#        postgreSQL_select_Query = "SELECT * from Table_Data_From_VK_to_telegram WHERE id_of_article=article_id"     # %s - означает принятый аргумент, n$ - позиция
+        postgreSQL_select_Query_to_VK = "SELECT * from Table_Data_From_VK_to_telegram WHERE id_of_article=%s"     # %s - означает принятый аргумент, n$ - позиция
+#        postgreSQL_select_Query_to_VK = "SELECT * from Table_Data_From_VK_to_telegram WHERE id_of_article=article_id"     # %s - означает принятый аргумент, n$ - позиция
         print('...000246')
         print('... article_id= ' + article_id)
-        #cursor.execute(postgreSQL_select_Query, article_id)
-        cursor.execute(postgreSQL_select_Query)
+        cursor.execute(postgreSQL_select_Query_to_VK, article_id)
+        #cursor.execute(postgreSQL_select_Query_to_VK)
         print('...000248')
         if not cursor.fetchall():
             return True
