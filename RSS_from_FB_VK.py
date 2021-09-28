@@ -39,9 +39,11 @@ if Run_On_Heroku:
     # теперь переменные для работы с ВК
     groupId_in_VK = os.environ.get("groupId_in_VK")
     token_VK_servisny=os.environ.get("token_VK_servisny") #Сервисный ключ доступа в приложении ВК
+    token_VK_access_token_to_walls = os.environ.get("token_VK_access_token_to_walls")  # Токен ВК с доступом только к wall, для опубликования там сообщений
     # ниже две переменные - пока для тестового канала
     Token_bot_for_communikate_VK = os.environ.get("Token_bot_for_communikate_VK")
     ChatID_Telegram_from_VK = os.environ.get("ChatID_Telegram_from_VK")
+
 
 else:
     from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT # эта строка похоже нужна только для локальной работы
@@ -144,7 +146,7 @@ finally:
         connection.close()
         print("Создание таблицы Table_Data_From_FB_RSS_kadry: Соединение с PostgreSQL закрыто\n")
 
-# Создание таблицы по получению постов из VK 
+# Создание таблицы по получению постов из VK --> Телеграм
 try:
     if Run_On_Heroku:
         connection = psycopg2.connect(DATABASE_URL, sslmode='require')
@@ -171,6 +173,34 @@ finally:
         cursor.close()
         connection.close()
         print("Создание таблицы Table_Data_From_VK_to_telegram: Соединение с PostgreSQL закрыто\n")
+
+# Создание таблицы по получению постов из Телеграм --> VK
+# try:
+#     if Run_On_Heroku:
+#         connection = psycopg2.connect(DATABASE_URL, sslmode='require')
+#     else:
+#         connection = psycopg2.connect(user="postgres",
+#                                      password=Password_to_local_PostgreSQL,
+#                                      host=host_for_postgres,
+#                                      port=port_for_postgres,
+#                                      database="postgres_baze_from_rss")
+#     cursor = connection.cursor()
+#     # SQL-запрос для создания новой таблицы получения постов из VK
+#     create_table_query = '''CREATE TABLE if not exists Table_Data_From_telegram_to_VK
+#                           (ID_time timestamp PRIMARY KEY     NOT NULL,
+#                           id_of_article       TEXT    NOT NULL,
+#                           title_of_article       TEXT    NOT NULL); '''
+#     # Выполнение команды: создает новую таблицу Table_Data_From_VK_to_telegram
+#     cursor.execute(create_table_query)
+#     connection.commit()
+#     print("Таблица Table_Data_From_telegram_to_VK получения данных из VK успешно создана в PostgreSQL ИЛИ проверено ее уже наличие")
+# except (Exception, Error) as error:
+#     print("Ошибка при работе с PostgreSQL-168-1: ", error)
+# finally:
+#     if connection:
+#         cursor.close()
+#         connection.close()
+#         print("Создание таблицы Table_Data_From_telegram_to_VK: Соединение с PostgreSQL закрыто\n")
 
 #=================================================================
 # АНАЛИЗ ДАННЫХ В БАЗАХ
@@ -286,10 +316,18 @@ def add_article_to_db_from_VK(article_id, article_title):
 #=================================================================
 
 # Процедура отправки сообщения Телеграм боту:
+#message_to_VK='собственно сообщение в одну строку - 001'
+#groupId_in_VK = int(-207356686) # ID группы в ВК, в которую будем транслировать 
+#token_VK_access_token_to_walls='cf3e4572f8b56390e5d5ecdbfe61cd3aba43a3e3a930bce15059ff8cf478a226b69eada674034c6bcbb0e' # Токен ВК с доступом только к wall
+
 def bot_sendtext_to_telega_kadry(bot_message):
     try:
         send_text = 'https://api.telegram.org/bot' + Token_bot_for_RSSfrom_FB + '/sendMessage?chat_id=' + ChatID_for_RSSfrom_FB + '&parse_mode=Markdown&text=' + bot_message
         requests.get(send_text, proxies=proxies, headers=headers)
+        message_to_VK = bot_message
+        params = {'owner_id':int(groupId_in_VK), 'from_group': 1, 'message': message_to_VK, 'access_token': token_VK_access_token_to_walls, 'v':5.103} # это отправка дубля на ВК
+        response = requests.get('https://api.vk.com/method/wall.post', params=params)
+        #print(response.text)
     except (Exception, Error) as error:
         print("Какая-то ошибка - 293: ", error)
 
@@ -340,7 +378,7 @@ def read_article_feed(feed):
                 add_article_to_db_from_FB(article['title'], article['published'])
                 #bot_sendtext_to_telega_kadry('*Форвард нового сообщения из Фейсбука:*\n\n' + text_of_article + article['link']) #эта строка была сокращенной версией, без учета излишне линных сообщений
                 full_text = '*Форвард нового сообщения из Фейсбука:*\n\n' + text_of_article + article['link']
-                full_text = full_text.replace("#", " %23")  # шестнадцатеричный код символа # = 0023, т.е. для отображения '\x23'.
+                full_text = full_text.replace("#", " %23")  # шестнадцатеричный код символа # = 0023, т.е. для отображения в теории '\x23' но оно не сработало, рекомендовали замену на %23.
                 if len(full_text) > 4096:
                     full_text_fix= len(full_text)
                     while full_text_fix > 4096:
@@ -421,10 +459,10 @@ def bot_sendtext_to_telega_from_VK(bot_message):
 # Получение постов из сообщества ВК.  
 def grabber_from_VK():
     my_offset = 0    # начальный индекс поиска публикаций
-    my_count = 4   #шаг продвижения индекса поиска публикаций
+    my_count = 90   #шаг продвижения индекса поиска публикаций
     try:
-        for i_tmp in range(0,1): # т.е. фактически опросим страницу (сообщество) 4 раза по count публикаций, боле чем достаточно
-            params = {'owner_id':groupId_in_VK,'offset':my_offset,'count':my_count,'filter':'all','extended':0,'access_token':token_VK_servisny,'v':5.103}         #формирование списка параметров запроса к api
+        for i_tmp in range(0,4): # т.е. фактически опросим страницу (сообщество) 4 раза по count публикаций, боле чем достаточно
+            params = {'owner_id':str(groupId_in_VK),'offset':my_offset,'count':my_count,'filter':'all','extended':0,'access_token':token_VK_servisny,'v':5.103}         #формирование списка параметров запроса к api
             posts = requests.get('https://api.vk.com/method/wall.get',params)         #отправка запроса с заданными параметрами
             posts_number = len(posts.json()['response']['items']) # число новых постов, полученных в текущем проходе
             for j in range(posts_number-1,-1,-1): #теперь будем обрабатывать и выгружать все полученные из ВК посты, начиная с более старых (ранних)
