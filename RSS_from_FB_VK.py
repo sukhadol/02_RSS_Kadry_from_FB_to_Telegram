@@ -383,9 +383,9 @@ def read_article_feed(feed):
 
             if article_NOT_in_BazeFromRSS(article['title'], article['published']):
                 add_article_to_db_from_FB(article['title'], article['published'])
-                if(len(text_of_article)) > 2500:
-                    #txt_tmp = message_to_VK[: 2500] + '...(есть продолжение)'
-                    bot_sendtext_to_VK_from_FB('Форвард нового сообщения из Фейсбука:\n\n' + message_to_VK[: 2000] + '...\nПродолжение в источнике:\n' + article['link']) #эта строка была сокращенной версией, без учета излишне длинных сообщений
+                if(len(text_of_article)) > 2500: # без этого ограничения выдавало ошибку 414 Request-URI Too Large
+                    #txt_tmp = text_of_article[: 2500] + '...(есть продолжение)'
+                    bot_sendtext_to_VK_from_FB('Форвард нового сообщения из Фейсбука:\n\n' + text_of_article[: 2000] + '...\nПродолжение в источнике:\n' + article['link']) #эта строка была сокращенной версией, без учета излишне длинных сообщений
                 else:
                     bot_sendtext_to_VK_from_FB('Форвард нового сообщения из Фейсбука:\n\n' + text_of_article + article['link']) #эта строка была сокращенной версией, без учета излишне длинных сообщений
                 full_text = '*Форвард нового сообщения из Фейсбука:*\n\n' + text_of_article + article['link']
