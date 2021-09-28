@@ -321,16 +321,26 @@ def add_article_to_db_from_VK(article_id, article_title):
 #groupId_in_VK = int(-207356686) # ID группы в ВК, в которую будем транслировать 
 #token_VK_access_token_to_walls='cf3e4572f8b56390e5d5ecdbfe61cd3aba43a3e3a930bce15059ff8cf478a226b69eada674034c6bcbb0e' # Токен ВК с доступом только к wall
 
-def bot_sendtext_to_telega_kadry(bot_message):
+def bot_sendtext_to_VK_from_FB(message_to_VK):
     try:
-        send_text = 'https://api.telegram.org/bot' + Token_bot_for_RSSfrom_FB + '/sendMessage?chat_id=' + ChatID_for_RSSfrom_FB + '&parse_mode=Markdown&text=' + bot_message
-        requests.get(send_text, proxies=proxies, headers=headers)
-        message_to_VK = bot_message
+        #message_to_VK = message_to_VK.replace("#", " %23")  # шестнадцатеричный код символа # = 0023, т.е. для отображения в теории '\x23' но оно не сработало, рекомендовали замену на %23.
         params = {'owner_id':int(groupId_in_VK), 'from_group': 1, 'message': message_to_VK, 'access_token': token_VK_access_token_to_walls, 'v':5.103} # это отправка дубля на ВК
         response = requests.get('https://api.vk.com/method/wall.post', params=params)
         #print(response.text)
     except (Exception, Error) as error:
-        print("Какая-то ошибка - 293: ", error)
+        print("Какая-то ошибка - 293-1: ", error)
+
+def bot_sendtext_to_telega_kadry(bot_message):
+    try:
+        send_text = 'https://api.telegram.org/bot' + Token_bot_for_RSSfrom_FB + '/sendMessage?chat_id=' + ChatID_for_RSSfrom_FB + '&parse_mode=Markdown&text=' + bot_message
+        requests.get(send_text, proxies=proxies, headers=headers)
+        #message_to_VK = bot_message
+        #params = {'owner_id':int(groupId_in_VK), 'from_group': 1, 'message': message_to_VK, 'access_token': token_VK_access_token_to_walls, 'v':5.103} # это отправка дубля на ВК
+        #response = requests.get('https://api.vk.com/method/wall.post', params=params)
+        #print(response.text)
+    except (Exception, Error) as error:
+        print("Какая-то ошибка - 293-2: ", error)
+
 
 # Процедура получения фида, проверки его наличия в БД:
 def read_article_feed(feed):
@@ -377,7 +387,7 @@ def read_article_feed(feed):
 
             if article_NOT_in_BazeFromRSS(article['title'], article['published']):
                 add_article_to_db_from_FB(article['title'], article['published'])
-                #bot_sendtext_to_telega_kadry('*Форвард нового сообщения из Фейсбука:*\n\n' + text_of_article + article['link']) #эта строка была сокращенной версией, без учета излишне линных сообщений
+                bot_sendtext_to_VK_from_FB('Форвард нового сообщения из Фейсбука:\n\n' + text_of_article + article['link']) #эта строка была сокращенной версией, без учета излишне длинных сообщений
                 full_text = '*Форвард нового сообщения из Фейсбука:*\n\n' + text_of_article + article['link']
                 full_text = full_text.replace("#", " %23")  # шестнадцатеричный код символа # = 0023, т.е. для отображения в теории '\x23' но оно не сработало, рекомендовали замену на %23.
                 if len(full_text) > 4096:
