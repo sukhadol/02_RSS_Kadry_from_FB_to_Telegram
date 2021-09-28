@@ -383,7 +383,11 @@ def read_article_feed(feed):
 
             if article_NOT_in_BazeFromRSS(article['title'], article['published']):
                 add_article_to_db_from_FB(article['title'], article['published'])
-                bot_sendtext_to_VK_from_FB('Форвард нового сообщения из Фейсбука:\n\n' + text_of_article + article['link']) #эта строка была сокращенной версией, без учета излишне длинных сообщений
+                if(len(text_of_article)) > 2500:
+                    #txt_tmp = message_to_VK[: 2500] + '...(есть продолжение)'
+                    bot_sendtext_to_VK_from_FB('Форвард нового сообщения из Фейсбука:\n\n' + message_to_VK[: 2000] + '...\nПродолжение в источнике:\n' + article['link']) #эта строка была сокращенной версией, без учета излишне длинных сообщений
+                else:
+                    bot_sendtext_to_VK_from_FB('Форвард нового сообщения из Фейсбука:\n\n' + text_of_article + article['link']) #эта строка была сокращенной версией, без учета излишне длинных сообщений
                 full_text = '*Форвард нового сообщения из Фейсбука:*\n\n' + text_of_article + article['link']
                 full_text = full_text.replace("#", " %23")  # шестнадцатеричный код символа # = 0023, т.е. для отображения в теории '\x23' но оно не сработало, рекомендовали замену на %23.
                 if len(full_text) > 4096:
