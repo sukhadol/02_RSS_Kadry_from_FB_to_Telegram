@@ -41,9 +41,10 @@ if Run_On_Heroku:
     token_VK_servisny=os.environ.get("token_VK_servisny") #Сервисный ключ доступа в приложении ВК
     token_VK_access_token_to_walls = os.environ.get("token_VK_access_token_to_walls")  # Токен ВК с доступом только к wall, для опубликования там сообщений
     # ниже две переменные - пока для тестового канала
-    Token_bot_for_communikate_VK = os.environ.get("Token_bot_for_communikate_VK")
-    ChatID_Telegram_from_VK = os.environ.get("ChatID_Telegram_from_VK")
-
+    #Token_bot_for_communikate_VK = os.environ.get("Token_bot_for_communikate_VK")
+    #ChatID_Telegram_from_VK = os.environ.get("ChatID_Telegram_from_VK")
+    Token_bot_for_communikate_VK = Token_bot_for_RSSfrom_FB
+    ChatID_Telegram_from_VK =ChatID_for_RSSfrom_FB
 
 else:
     from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT # эта строка похоже нужна только для локальной работы
