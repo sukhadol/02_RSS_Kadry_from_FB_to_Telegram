@@ -475,8 +475,8 @@ def grabber_from_VK():
                 if article_NOT_in_BazeFromVK(str(posts.json()['response']['items'][j]['id'])):
                     #еще проверяем на зацикливание форвардов из разных источников. 
                     elem_txt=(posts.json()['response']['items'][j]['text']) 
-                    if(elem_txt.startswith(('Форвард нового сообщения из Фейсбука', 'Форвард нового сообщения из Телеграма'))):
-                        print('...публиковать данный пост не надо, это уже и так форвард. Но чтобы не сбиваться - надо добавить его в базу. Речь о посте=')
+                    if(elem_txt.startswith(('Форвард нового сообщения из Фейсбука', 'Форвард нового сообщения из Телеграм'))):
+                        print('...публиковать данный пост не надо, это было в ВК и так уже форвард. Но чтобы не сбиваться - надо добавить его в базу. Речь о посте=')
                         print(posts.json()['response']['items'][j]['text'])
                         add_article_to_db_from_VK(str(posts.json()['response']['items'][j]['id']), posts.json()['response']['items'][j]['text'])
                     else:
