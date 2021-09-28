@@ -175,33 +175,6 @@ finally:
         connection.close()
         print("Создание таблицы Table_Data_From_VK_to_telegram: Соединение с PostgreSQL закрыто\n")
 
-# Создание таблицы по получению постов из Телеграм --> VK
-# try:
-#     if Run_On_Heroku:
-#         connection = psycopg2.connect(DATABASE_URL, sslmode='require')
-#     else:
-#         connection = psycopg2.connect(user="postgres",
-#                                      password=Password_to_local_PostgreSQL,
-#                                      host=host_for_postgres,
-#                                      port=port_for_postgres,
-#                                      database="postgres_baze_from_rss")
-#     cursor = connection.cursor()
-#     # SQL-запрос для создания новой таблицы получения постов из VK
-#     create_table_query = '''CREATE TABLE if not exists Table_Data_From_telegram_to_VK
-#                           (ID_time timestamp PRIMARY KEY     NOT NULL,
-#                           id_of_article       TEXT    NOT NULL,
-#                           title_of_article       TEXT    NOT NULL); '''
-#     # Выполнение команды: создает новую таблицу Table_Data_From_VK_to_telegram
-#     cursor.execute(create_table_query)
-#     connection.commit()
-#     print("Таблица Table_Data_From_telegram_to_VK получения данных из VK успешно создана в PostgreSQL ИЛИ проверено ее уже наличие")
-# except (Exception, Error) as error:
-#     print("Ошибка при работе с PostgreSQL-168-1: ", error)
-# finally:
-#     if connection:
-#         cursor.close()
-#         connection.close()
-#         print("Создание таблицы Table_Data_From_telegram_to_VK: Соединение с PostgreSQL закрыто\n")
 
 #=================================================================
 # АНАЛИЗ ДАННЫХ В БАЗАХ
@@ -454,10 +427,10 @@ def get_posts():
             print("Получение данных: Соединение с PostgreSQL закрыто\n")
 
 #=================================================================
-# РАБОТА С ТЕЛЕГРАМ
+# РАБОТА С ВКОНТАКТЕ
 #=================================================================
 
-# Процедура отправки сообщения в канал Телеграм из ВК (после тестирования можно поставить токен ):
+# Процедура отправки сообщения в канал Телеграм из ВК (после тестирования можно поставил правильный токен ):
 def bot_sendtext_to_telega_from_VK(bot_message):
     try:
         send_text = 'https://api.telegram.org/bot' + Token_bot_for_communikate_VK + '/sendMessage?chat_id=' + ChatID_Telegram_from_VK + '&parse_mode=Markdown&text=' + bot_message
@@ -481,16 +454,23 @@ def grabber_from_VK():
 #                elem_id = str(posts.json()['response']['items'][j]['id']) 
 #                print('...проверяем элемент id = ' + elem_id)
 
+                # if text_of_article == '':
+                #     text_of_article = text_of_article + article['title']
+                #     text_of_article = text_of_article.replace("A post from", "Репост от") + ", поэтому полный текст сообщения смотрите на Facebook по ссылке"
+
                 if article_NOT_in_BazeFromVK(str(posts.json()['response']['items'][j]['id'])):
                     #еще проверяем на зацикливание форвардов из разных источников. 
                     elem_txt=(posts.json()['response']['items'][j]['text']) 
                     if(elem_txt.startswith(('Форвард нового сообщения из Фейсбука', 'Форвард нового сообщения из Телеграм'))):
                         print('...публиковать данный пост не надо, это было в ВК и так уже форвард. Но чтобы не сбиваться - надо добавить его в базу. Речь о посте=')
-                        print(posts.json()['response']['items'][j]['text'])
-                        add_article_to_db_from_VK(str(posts.json()['response']['items'][j]['id']), posts.json()['response']['items'][j]['text'])
+                        print((elem_txt)[:80])
+                        add_article_to_db_from_VK(str(posts.json()['response']['items'][j]['id']), elem_txt)
                     else:
-                        add_article_to_db_from_VK(str(posts.json()['response']['items'][j]['id']), posts.json()['response']['items'][j]['text'])
-                        full_text = '*Форвард нового сообщения из ВКонтакте:*\n\n' + str(posts.json()['response']['items'][j]['text']) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'\_'+str(posts.json()['response']['items'][j]['id'])
+                        add_article_to_db_from_VK(str(posts.json()['response']['items'][j]['id']), elem_txt)
+                        if elem_txt == '':
+                            full_text = '*Форвард нового сообщения из ВК:*\n\n' + (posts.json()['response']['items'][j]['copy_history'][0]['text']) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'\_'+str(posts.json()['response']['items'][j]['id'])
+                        else:
+                            full_text = '*Форвард нового сообщения из ВКонтакте:*\n\n' + str(elem_txt) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'\_'+str(posts.json()['response']['items'][j]['id'])
                         #print('...full_text = ' + full_text)
                         full_text = full_text.replace("#", " %23")  # шестнадцатеричный код символа # = 0023, т.е. для отображения '\x23'.
                         if len(full_text) > 4096:
@@ -507,10 +487,10 @@ def grabber_from_VK():
                         else:
                             bot_sendtext_to_telega_from_VK(full_text)
                         print('...публикуем и добавляем в базу пост с содержанием= ')
-                        print(posts.json()['response']['items'][j]['text'])
+                        print((elem_txt)[:80])
                 else:
                     print('...добавлять и публиковать данный пост не надо, уже есть, речь о посте=')
-                    print(posts.json()['response']['items'][j]['text'])
+                    print((elem_txt)[:80])
             my_offset += my_count   # наращивание шага продвижения по публикациям, чтобы на всякий случай пройти несколько циклов, если надо
             time.sleep(2)        # принудительная «приостановка» работы программы, для соблюдения требований api по количеству запрсов
     except (Exception, Error) as error:
