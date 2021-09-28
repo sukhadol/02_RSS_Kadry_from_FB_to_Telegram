@@ -322,7 +322,7 @@ def bot_sendtext_to_VK_from_FB(message_to_VK):
         #message_to_VK = message_to_VK.replace("#", " %23")  # шестнадцатеричный код символа # = 0023, т.е. для отображения в теории '\x23' но оно не сработало, рекомендовали замену на %23.
         params = {'owner_id':int(groupId_in_VK), 'from_group': 1, 'message': message_to_VK, 'access_token': token_VK_access_token_to_walls, 'v':5.103} # это отправка дубля на ВК
         response = requests.get('https://api.vk.com/method/wall.post', params=params)
-        print(response.text)
+        print(response.text[0:100]) # если все верно - то публикуем только первые 100 символов
     except (Exception, Error) as error:
         print("Какая-то ошибка - 293-1: ", error)
 
@@ -407,7 +407,7 @@ def read_article_feed(feed):
                 print(article['title'])
             else:
                 print('...добавлять и публиковать данный пост не надо, уже есть, речь о посте=')
-                print(article['title'][: 100]) #публикуем только первые 100 символов
+                print((article['title'])[:100]) #публикуем только первые 100 символов
 #               print(text_of_article)
     except (Exception, Error) as error:
         print("Какая-то ошибка - 364: ", error)
