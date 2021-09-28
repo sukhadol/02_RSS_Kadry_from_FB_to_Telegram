@@ -316,11 +316,6 @@ def add_article_to_db_from_VK(article_id, article_title):
 # РАБОТА С RSS из FACEBOOK
 #=================================================================
 
-# Процедура отправки сообщения Телеграм боту:
-#message_to_VK='собственно сообщение в одну строку - 001'
-#groupId_in_VK = int(-207356686) # ID группы в ВК, в которую будем транслировать 
-#token_VK_access_token_to_walls='cf3e4572f8b56390e5d5ecdbfe61cd3aba43a3e3a930bce15059ff8cf478a226b69eada674034c6bcbb0e' # Токен ВК с доступом только к wall
-
 def bot_sendtext_to_VK_from_FB(message_to_VK):
     try:
         #message_to_VK = message_to_VK.replace("#", " %23")  # шестнадцатеричный код символа # = 0023, т.е. для отображения в теории '\x23' но оно не сработало, рекомендовали замену на %23.
