@@ -327,7 +327,7 @@ def read_article_feed(feed):
             # если в ФБ был репост, то видим на странице пустое сообщение, поэтому его корректируем
             if text_of_article == '':
                 text_of_article = text_of_article + article['title']
-                text_of_article = text_of_article.replace("A post from", "Репост от") + ", поэтому полный текст сообщения смотрите на Facebook по ссылке"
+                text_of_article = text_of_article.replace("A post from", "Репост от") + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
 
 
             # далее блок для ситуации, когда пост пустой, только с картинкой. Надо выявить что это картинка и отправить ее в телеграм вместо текстового сообщения.     
