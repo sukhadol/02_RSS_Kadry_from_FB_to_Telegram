@@ -18,6 +18,8 @@ import vk_api
 from vk_api import VkApi
 import time
 
+import facebook
+
 #=================================================================
 # ВВОДНАЯ ЧАСТЬ
 #=================================================================
@@ -29,6 +31,9 @@ else:
     Run_On_Heroku = False
 
 # получаем переменные из окружения или конфиг.файла ChatID_for_RSSfrom_FB, Token_bot_for_RSSfrom_FB
+# Переменные окружения на Heroku: ChatID_for_RSSfrom_FB --- ADMIN_CHAT --- TOKEN --- HEROKU_APP_NAME --- We_are_on_Heroku --- ACCESS_TOKEN_Facebook
+# Переменные окружения на Heroku для ВК: groupId_in_VK --- token_VK_servisny --- token_VK_access_token_to_walls
+
 if Run_On_Heroku:
     ChatID_for_RSSfrom_FB = os.environ.get("ChatID_for_RSSfrom_FB")
     Token_bot_for_RSSfrom_FB = os.environ.get("Token_bot_for_RSSfrom_FB")
@@ -40,11 +45,17 @@ if Run_On_Heroku:
     groupId_in_VK = os.environ.get("groupId_in_VK")
     token_VK_servisny=os.environ.get("token_VK_servisny") #Сервисный ключ доступа в приложении ВК
     token_VK_access_token_to_walls = os.environ.get("token_VK_access_token_to_walls")  # Токен ВК с доступом только к wall, для опубликования там сообщений
+    # теперь переменные для работы с ФБ
+    ACCESS_TOKEN_Facebook = os.environ.get("ACCESS_TOKEN_Facebook")
+    groupid_in_FB = 1013708529168332
+
     # ниже две переменные - пока для тестового канала
     #Token_bot_for_communikate_VK = os.environ.get("Token_bot_for_communikate_VK")
     #ChatID_Telegram_from_VK = os.environ.get("ChatID_Telegram_from_VK")
     Token_bot_for_communikate_VK = Token_bot_for_RSSfrom_FB
     ChatID_Telegram_from_VK =ChatID_for_RSSfrom_FB
+
+    ADMIN_CHAT = os.environ.get("ADMIN_CHAT")
 
 else:
     from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT # эта строка похоже нужна только для локальной работы
@@ -296,7 +307,21 @@ def bot_sendtext_to_VK_from_FB(message_to_VK):
         response = requests.get('https://api.vk.com/method/wall.post', params=params)
         print(response.text[0:100]) # если все верно - то публикуем только первые 100 символов
     except (Exception, Error) as error:
-        print("Какая-то ошибка - 293-1: ", error)
+        print("Какая-то ошибка - 311: ", error)
+        text_tmp="...Техническое сообщение. Не смогли отправить пост в ВК. Ошибка строки 311"
+        send_text = 'https://api.telegram.org/bot' + Token_bot_for_RSSfrom_FB + '/sendMessage?chat_id=' + ADMIN_CHAT + '&parse_mode=Markdown&text=' + text_tmp
+        requests.get(send_text, proxies=proxies, headers=headers)
+
+def bot_sendtext_to_FB_from_VK(message_to_FB):
+    try:
+        print('...отправка в ФБ')
+        graph = facebook.GraphAPI(ACCESS_TOKEN_Facebook)
+        responseFB=graph.put_object(groupid_in_FB, "feed", message=message_to_FB)
+        print(responseFB[0:100]) # если все верно - то публикуем только первые 100 символов
+    except (Exception, Error) as error:
+        print("Какая-то ошибка отправки в ФБ - 323: ", error)
+        text_tmp = "...Техническое сообщение. Не смогли отправить пост в ФБ. Ошибка строки 323" 
+        send_text = 'https://api.telegram.org/bot' + Token_bot_for_RSSfrom_FB + '/sendMessage?chat_id=' + ADMIN_CHAT + '&parse_mode=Markdown&text=' + text_tmp
 
 def bot_sendtext_to_telega_kadry(bot_message):
     try:
@@ -355,6 +380,7 @@ def read_article_feed(feed):
 
             if article_NOT_in_BazeFromRSS(article['title'], article['published']):
                 add_article_to_db_from_FB(article['title'], article['published'])
+                # далее 5 строк - варианты публикации в ВК
                 if(len(text_of_article)) > 2500: # без этого ограничения выдавало ошибку 414 Request-URI Too Large
                     bot_sendtext_to_VK_from_FB('Форвард нового сообщения из Фейсбука:\n\n' + text_of_article[: 2500] + '...\n\nПродолжение в источнике:\n' + article['link']) #эта строка была сокращенной версией, без учета излишне длинных сообщений
                 else:
@@ -456,7 +482,7 @@ def grabber_from_VK():
 
                 elem_txt=(posts.json()['response']['items'][j]['text']) 
                 if article_NOT_in_BazeFromVK(str(posts.json()['response']['items'][j]['id'])):
-                    #еще проверяем на зацикливание форвардов из разных источников. 
+                    #еще проверяем на зацикливание из ВК - форвардов из разных источников (Фейсбука и Телеграма). 
                     if(elem_txt.startswith(('Форвард нового сообщения из Фейсбука', 'Форвард нового сообщения из Телеграм'))):
                         print('...публиковать данный пост не надо, это было в ВК и так уже форвард. Но чтобы не сбиваться - надо добавить его в базу. Речь о посте=')
                         print((elem_txt)[:80])
@@ -464,10 +490,12 @@ def grabber_from_VK():
                     else:
                         add_article_to_db_from_VK(str(posts.json()['response']['items'][j]['id']), elem_txt)
                         if elem_txt == '':
-                            full_text = '*Форвард нового сообщения из ВК:*\n\n' + (posts.json()['response']['items'][j]['copy_history'][0]['text']) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'\_'+str(posts.json()['response']['items'][j]['id'])
+                            full_text = '*Форвард нового сообщения из ВКонтакте:*\n\n' + (posts.json()['response']['items'][j]['copy_history'][0]['text']) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'\_'+str(posts.json()['response']['items'][j]['id'])
                         else:
                             full_text = '*Форвард нового сообщения из ВКонтакте:*\n\n' + str(elem_txt) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'\_'+str(posts.json()['response']['items'][j]['id'])
                         #print('...full_text = ' + full_text)
+                        bot_sendtext_to_FB_from_VK(full_text) # функция  отправки сообщения из ВК в ФБ
+
                         full_text = full_text.replace("#", " %23")  # шестнадцатеричный код символа # = 0023, т.е. для отображения '\x23'.
                         if len(full_text) > 4096:
                             full_text_fix= len(full_text)
