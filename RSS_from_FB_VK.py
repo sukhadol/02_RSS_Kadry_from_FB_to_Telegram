@@ -492,8 +492,7 @@ def grabber_from_VK():
                         print((elem_txt)[:80])
                         add_article_to_db_from_VK(str(posts.json()['response']['items'][j]['id']), elem_txt)
                     else:
-                        # !!!
-                        #add_article_to_db_from_VK(str(posts.json()['response']['items'][j]['id']), elem_txt)
+                        add_article_to_db_from_VK(str(posts.json()['response']['items'][j]['id']), elem_txt)
                         if elem_txt == '':
                             full_text = '*Форвард нового сообщения из ВКонтакте:*\n\n' + (posts.json()['response']['items'][j]['copy_history'][0]['text']) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'\_'+str(posts.json()['response']['items'][j]['id'])
                             full_text_to_FB = 'Форвард нового сообщения из ВКонтакте:\n\n' + (posts.json()['response']['items'][j]['copy_history'][0]['text']) + '\n\nИсточник в ВК:\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'_'+str(posts.json()['response']['items'][j]['id'])
