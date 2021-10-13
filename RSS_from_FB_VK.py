@@ -492,7 +492,8 @@ def grabber_from_VK():
                         print((elem_txt)[:80])
                         add_article_to_db_from_VK(str(posts.json()['response']['items'][j]['id']), elem_txt)
                     else:
-                        add_article_to_db_from_VK(str(posts.json()['response']['items'][j]['id']), elem_txt)
+                        # !!!
+                        #add_article_to_db_from_VK(str(posts.json()['response']['items'][j]['id']), elem_txt)
                         if elem_txt == '':
                             full_text = '*Форвард нового сообщения из ВКонтакте:*\n\n' + (posts.json()['response']['items'][j]['copy_history'][0]['text']) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'\_'+str(posts.json()['response']['items'][j]['id'])
                             full_text_to_FB = 'Форвард нового сообщения из ВКонтакте:\n\n' + (posts.json()['response']['items'][j]['copy_history'][0]['text']) + '\n\nИсточник в ВК:\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'_'+str(posts.json()['response']['items'][j]['id'])
@@ -501,25 +502,25 @@ def grabber_from_VK():
                             full_text_to_FB = 'Форвард нового сообщения из ВКонтакте:\n\n' + str(elem_txt) + '\n\nИсточник в ВК:\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'_'+str(posts.json()['response']['items'][j]['id'])
                         #print('...full_text = ' + full_text)
                         
-                        if (str(posts.json()['response']['items'][j]['id'] == 63)):
-                            print ('... пропускаем')
-                        else:
-                            bot_sendtext_to_FB_from_VK(full_text_to_FB) # функция  отправки сообщения из ВК в ФБ
+                        # if (str(posts.json()['response']['items'][j]['id'] == 63)):
+                        #     print ('... пропускаем')
+                        # else:
+                        bot_sendtext_to_FB_from_VK(full_text_to_FB) # функция  отправки сообщения из ВК в ФБ
 
-                        full_text = full_text.replace("#", " %23")  # шестнадцатеричный код символа # = 0023, т.е. для отображения '\x23'.
-                        if len(full_text) > 4096:
-                            full_text_fix= len(full_text)
-                            while full_text_fix > 4096:
-                                first_part_text = full_text[0:4096-35]
-                                point_end_of_text = first_part_text.rfind("\n")  
-                                first_part_to_send = first_part_text[0:point_end_of_text]               
-                                bot_sendtext_to_telega_from_VK(first_part_to_send + '\n_(продолжение следует...)_')
-                                full_text = '\n_(...продолжение)_\n' + full_text[point_end_of_text:len(full_text)]
-                                full_text_fix= len(full_text)
-                            else:
-                                bot_sendtext_to_telega_from_VK(full_text)
-                        else:
-                            bot_sendtext_to_telega_from_VK(full_text)
+                        # full_text = full_text.replace("#", " %23")  # шестнадцатеричный код символа # = 0023, т.е. для отображения '\x23'.
+                        # if len(full_text) > 4096:
+                        #     full_text_fix= len(full_text)
+                        #     while full_text_fix > 4096:
+                        #         first_part_text = full_text[0:4096-35]
+                        #         point_end_of_text = first_part_text.rfind("\n")  
+                        #         first_part_to_send = first_part_text[0:point_end_of_text]               
+                        #         bot_sendtext_to_telega_from_VK(first_part_to_send + '\n_(продолжение следует...)_')
+                        #         full_text = '\n_(...продолжение)_\n' + full_text[point_end_of_text:len(full_text)]
+                        #         full_text_fix= len(full_text)
+                        #     else:
+                        #         bot_sendtext_to_telega_from_VK(full_text)
+                        # else:
+                        #     bot_sendtext_to_telega_from_VK(full_text)
                         print('...публикуем и добавляем в базу пост с содержанием= ')
                         print((elem_txt)[:80])
                 else:
