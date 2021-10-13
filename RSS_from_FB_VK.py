@@ -320,10 +320,12 @@ def bot_sendtext_to_FB_from_VK(message_to_FB):
         print(responseFB[0:100]) # если все верно - то публикуем только первые 100 символов
     except (Exception, Error) as error:
         print("Какая-то ошибка отправки в ФБ - 323: ", error)
+        print('...пытались отправить вот это сообщение:')
+        print(message_to_VK)
         text_tmp = "...Техническое сообщение. Не смогли отправить пост в ФБ. Ошибка строки 323" 
         send_text = 'https://api.telegram.org/bot' + Token_bot_for_RSSfrom_FB + '/sendMessage?chat_id=' + ADMIN_CHAT + '&parse_mode=Markdown&text=' + text_tmp
         requests.get(send_text, proxies=proxies, headers=headers)
-        
+
 def bot_sendtext_to_telega_kadry(bot_message):
     try:
         send_text = 'https://api.telegram.org/bot' + Token_bot_for_RSSfrom_FB + '/sendMessage?chat_id=' + ChatID_for_RSSfrom_FB + '&parse_mode=Markdown&text=' + bot_message
@@ -489,7 +491,8 @@ def grabber_from_VK():
                         print((elem_txt)[:80])
                         add_article_to_db_from_VK(str(posts.json()['response']['items'][j]['id']), elem_txt)
                     else:
-                        add_article_to_db_from_VK(str(posts.json()['response']['items'][j]['id']), elem_txt)
+                        # !!!!
+                        # add_article_to_db_from_VK(str(posts.json()['response']['items'][j]['id']), elem_txt)
                         if elem_txt == '':
                             full_text = '*Форвард нового сообщения из ВКонтакте:*\n\n' + (posts.json()['response']['items'][j]['copy_history'][0]['text']) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'\_'+str(posts.json()['response']['items'][j]['id'])
                         else:
