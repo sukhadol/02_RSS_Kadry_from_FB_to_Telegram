@@ -318,7 +318,7 @@ def bot_sendtext_to_FB_from_VK(message_to_FB):
         print('...отправка в ФБ')
         graph = facebook.GraphAPI(ACCESS_TOKEN_Facebook)
         responseFB=graph.put_object(groupid_in_FB, "feed", message=message_to_FB)
-        print(responseFB[0:100]) # если все верно - то публикуем только первые 100 символов
+        print(str(responseFB)[0:100]) # если все верно - то публикуем только первые 100 символов
     except (Exception, Error) as error:
         print("Какая-то ошибка отправки в ФБ - 323: ", error)
         print('... из блока ошибки - пытались отправить вот это сообщение:')
@@ -502,31 +502,31 @@ def grabber_from_VK():
                             print('... ... отправка 01')
                             print(full_text_to_FB)
                             bot_sendtext_to_FB_from_VK(full_text_to_FB)
-                            full_text_to_FB = 'Форвард нового сообщения из ВКонтакте - тест 002</br>и еще 2 слова' 
-                            print('... ... отправка 02')
-                            print(full_text_to_FB)
-                            bot_sendtext_to_FB_from_VK(full_text_to_FB)
-                            full_text_to_FB = 'Форвард нового сообщения из ВКонтакте --41:\n\n' 
-                            print('... ... отправка 1')
-                            print(full_text_to_FB)
-                            bot_sendtext_to_FB_from_VK(full_text_to_FB)
-                            full_text_to_FB = full_text_to_FB  + (posts.json()['response']['items'][j]['copy_history'][0]['text']) 
-                            print('... ... отправка 2')
-                            print(full_text_to_FB)
-                            bot_sendtext_to_FB_from_VK(full_text_to_FB)
-                            full_text_to_FB = full_text_to_FB + '\n\n'
-                            print('... ... отправка 3')
-                            print(full_text_to_FB)
-                            bot_sendtext_to_FB_from_VK(full_text_to_FB)
-                            full_text_to_FB = full_text_to_FB +'https://vk.com/wall'
-                            print('... ... отправка 4')
-                            print(full_text_to_FB)
-                            bot_sendtext_to_FB_from_VK(full_text_to_FB)
-                            full_text_to_FB = full_text_to_FB +str(groupId_in_VK)
-                            print(full_text_to_FB)
-                            bot_sendtext_to_FB_from_VK(full_text_to_FB)
-                            full_text_to_FB = full_text_to_FB +'_'
-                            print(full_text_to_FB)
+                            # full_text_to_FB = 'Форвард нового сообщения из ВКонтакте - тест 002</br>и еще 2 слова' 
+                            # print('... ... отправка 02')
+                            # print(full_text_to_FB)
+                            # bot_sendtext_to_FB_from_VK(full_text_to_FB)
+                            # full_text_to_FB = 'Форвард нового сообщения из ВКонтакте --41:\n\n' 
+                            # print('... ... отправка 1')
+                            # print(full_text_to_FB)
+                            # bot_sendtext_to_FB_from_VK(full_text_to_FB)
+                            # full_text_to_FB = full_text_to_FB  + (posts.json()['response']['items'][j]['copy_history'][0]['text']) 
+                            # print('... ... отправка 2')
+                            # print(full_text_to_FB)
+                            # bot_sendtext_to_FB_from_VK(full_text_to_FB)
+                            # full_text_to_FB = full_text_to_FB + '\n\n'
+                            # print('... ... отправка 3')
+                            # print(full_text_to_FB)
+                            # bot_sendtext_to_FB_from_VK(full_text_to_FB)
+                            # full_text_to_FB = full_text_to_FB +'https://vk.com/wall'
+                            # print('... ... отправка 4')
+                            # print(full_text_to_FB)
+                            # bot_sendtext_to_FB_from_VK(full_text_to_FB)
+                            # full_text_to_FB = full_text_to_FB +str(groupId_in_VK)
+                            # print(full_text_to_FB)
+                            # bot_sendtext_to_FB_from_VK(full_text_to_FB)
+                            # full_text_to_FB = full_text_to_FB +'_'
+                            # print(full_text_to_FB)
 
                           #  full_text_to_FB = 'Форвард нового сообщения из ВКонтакте ---1:\n\n' + (posts.json()['response']['items'][j]['copy_history'][0]['text']) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'\_'+str(posts.json()['response']['items'][j]['id'])
                         else:
