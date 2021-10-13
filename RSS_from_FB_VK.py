@@ -316,12 +316,14 @@ def bot_sendtext_to_VK_from_FB(message_to_VK):
 def bot_sendtext_to_FB_from_VK(message_to_FB):
     try:
         print('...отправка в ФБ')
+        print('...пытаемся отправить вот это сообщение:')
+        print(message_to_VK)
         graph = facebook.GraphAPI(ACCESS_TOKEN_Facebook)
         responseFB=graph.put_object(groupid_in_FB, "feed", message=message_to_FB)
         print(responseFB[0:100]) # если все верно - то публикуем только первые 100 символов
     except (Exception, Error) as error:
         print("Какая-то ошибка отправки в ФБ - 323: ", error)
-        print('...пытались отправить вот это сообщение:')
+        print('... из блока ошибки - пытались отправить вот это сообщение:')
         print(message_to_VK)
         text_tmp = "...Техническое сообщение. Не смогли отправить пост в ФБ. Ошибка строки 323" 
         send_text = 'https://api.telegram.org/bot' + Token_bot_for_RSSfrom_FB + '/sendMessage?chat_id=' + ADMIN_CHAT + '&parse_mode=Markdown&text=' + text_tmp
