@@ -496,7 +496,26 @@ def grabber_from_VK():
                         # add_article_to_db_from_VK(str(posts.json()['response']['items'][j]['id']), elem_txt)
                         if elem_txt == '':
                           #  full_text = '*Форвард нового сообщения из ВКонтакте:*\n\n' + (posts.json()['response']['items'][j]['copy_history'][0]['text']) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'\_'+str(posts.json()['response']['items'][j]['id'])
-                            full_text_to_FB = 'Форвард нового сообщения из ВКонтакте --21:\n\n' + (posts.json()['response']['items'][j]['copy_history'][0]['text']) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'_'
+                          #  full_text_to_FB = 'Форвард нового сообщения из ВКонтакте --21:\n\n' + (posts.json()['response']['items'][j]['copy_history'][0]['text']) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'_'
+
+                            full_text_to_FB = 'Форвард нового сообщения из ВКонтакте --41:\n\n' 
+                            print(full_text_to_FB)
+                            bot_sendtext_to_FB_from_VK(full_text_to_FB)
+                            full_text_to_FB = full_text_to_FB  + (posts.json()['response']['items'][j]['copy_history'][0]['text']) 
+                            print(full_text_to_FB)
+                            bot_sendtext_to_FB_from_VK(full_text_to_FB)
+                            full_text_to_FB = full_text_to_FB + '\n\n'
+                            print(full_text_to_FB)
+                            bot_sendtext_to_FB_from_VK(full_text_to_FB)
+                            full_text_to_FB = full_text_to_FB +'https://vk.com/wall'
+                            print(full_text_to_FB)
+                            bot_sendtext_to_FB_from_VK(full_text_to_FB)
+                            full_text_to_FB = full_text_to_FB +str(groupId_in_VK)
+                            print(full_text_to_FB)
+                            bot_sendtext_to_FB_from_VK(full_text_to_FB)
+                            full_text_to_FB = full_text_to_FB +'_'
+                            print(full_text_to_FB)
+
                           #  full_text_to_FB = 'Форвард нового сообщения из ВКонтакте ---1:\n\n' + (posts.json()['response']['items'][j]['copy_history'][0]['text']) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'\_'+str(posts.json()['response']['items'][j]['id'])
                         else:
                             full_text = '*Форвард нового сообщения из ВКонтакте:*\n\n' + str(elem_txt) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'\_'+str(posts.json()['response']['items'][j]['id'])
