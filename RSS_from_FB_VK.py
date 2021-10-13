@@ -322,7 +322,8 @@ def bot_sendtext_to_FB_from_VK(message_to_FB):
         print("Какая-то ошибка отправки в ФБ - 323: ", error)
         text_tmp = "...Техническое сообщение. Не смогли отправить пост в ФБ. Ошибка строки 323" 
         send_text = 'https://api.telegram.org/bot' + Token_bot_for_RSSfrom_FB + '/sendMessage?chat_id=' + ADMIN_CHAT + '&parse_mode=Markdown&text=' + text_tmp
-
+        requests.get(send_text, proxies=proxies, headers=headers)
+        
 def bot_sendtext_to_telega_kadry(bot_message):
     try:
         send_text = 'https://api.telegram.org/bot' + Token_bot_for_RSSfrom_FB + '/sendMessage?chat_id=' + ChatID_for_RSSfrom_FB + '&parse_mode=Markdown&text=' + bot_message
@@ -494,7 +495,7 @@ def grabber_from_VK():
                         else:
                             full_text = '*Форвард нового сообщения из ВКонтакте:*\n\n' + str(elem_txt) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'\_'+str(posts.json()['response']['items'][j]['id'])
                         #print('...full_text = ' + full_text)
-                        bot_sendtext_to_FB_from_VK(full_text) # функция  отправки сообщения из ВК в ФБ
+                        bot_sendtext_to_FB_from_VK(str(full_text)) # функция  отправки сообщения из ВК в ФБ
 
                         full_text = full_text.replace("#", " %23")  # шестнадцатеричный код символа # = 0023, т.е. для отображения '\x23'.
                         if len(full_text) > 4096:
