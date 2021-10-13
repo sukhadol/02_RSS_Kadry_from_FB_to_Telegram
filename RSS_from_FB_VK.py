@@ -318,7 +318,9 @@ def bot_sendtext_to_FB_from_VK(message_to_FB):
         print('...отправка в ФБ')
         graph = facebook.GraphAPI(ACCESS_TOKEN_Facebook)
         responseFB=graph.put_object(groupid_in_FB, "feed", message=message_to_FB)
-        print(str(responseFB)[0:100]) # если все верно - то публикуем только первые 100 символов
+        print('... отправляем вот это сообщение:')
+        print(message_to_FB)
+        print('...опубликовали в ФБ успешно ' + str(responseFB)[0:100]) # если все верно - то публикуем только первые 100 символов
     except (Exception, Error) as error:
         print("Какая-то ошибка отправки в ФБ - 323: ", error)
         print('... из блока ошибки - пытались отправить вот это сообщение:')
@@ -495,61 +497,29 @@ def grabber_from_VK():
                         # !!!!
                         # add_article_to_db_from_VK(str(posts.json()['response']['items'][j]['id']), elem_txt)
                         if elem_txt == '':
-                          #  full_text = '*Форвард нового сообщения из ВКонтакте:*\n\n' + (posts.json()['response']['items'][j]['copy_history'][0]['text']) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'\_'+str(posts.json()['response']['items'][j]['id'])
-                          #  full_text_to_FB = 'Форвард нового сообщения из ВКонтакте --21:\n\n' + (posts.json()['response']['items'][j]['copy_history'][0]['text']) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'_'
-
-                            full_text_to_FB = 'Форвард нового сообщения из ВКонтакте - тест 0001' 
-                            print('... ... отправка 01')
-                            print(full_text_to_FB)
-                            bot_sendtext_to_FB_from_VK(full_text_to_FB)
-                            # full_text_to_FB = 'Форвард нового сообщения из ВКонтакте - тест 002</br>и еще 2 слова' 
-                            # print('... ... отправка 02')
-                            # print(full_text_to_FB)
-                            # bot_sendtext_to_FB_from_VK(full_text_to_FB)
-                            # full_text_to_FB = 'Форвард нового сообщения из ВКонтакте --41:\n\n' 
-                            # print('... ... отправка 1')
-                            # print(full_text_to_FB)
-                            # bot_sendtext_to_FB_from_VK(full_text_to_FB)
-                            # full_text_to_FB = full_text_to_FB  + (posts.json()['response']['items'][j]['copy_history'][0]['text']) 
-                            # print('... ... отправка 2')
-                            # print(full_text_to_FB)
-                            # bot_sendtext_to_FB_from_VK(full_text_to_FB)
-                            # full_text_to_FB = full_text_to_FB + '\n\n'
-                            # print('... ... отправка 3')
-                            # print(full_text_to_FB)
-                            # bot_sendtext_to_FB_from_VK(full_text_to_FB)
-                            # full_text_to_FB = full_text_to_FB +'https://vk.com/wall'
-                            # print('... ... отправка 4')
-                            # print(full_text_to_FB)
-                            # bot_sendtext_to_FB_from_VK(full_text_to_FB)
-                            # full_text_to_FB = full_text_to_FB +str(groupId_in_VK)
-                            # print(full_text_to_FB)
-                            # bot_sendtext_to_FB_from_VK(full_text_to_FB)
-                            # full_text_to_FB = full_text_to_FB +'_'
-                            # print(full_text_to_FB)
-
-                          #  full_text_to_FB = 'Форвард нового сообщения из ВКонтакте ---1:\n\n' + (posts.json()['response']['items'][j]['copy_history'][0]['text']) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'\_'+str(posts.json()['response']['items'][j]['id'])
+                            full_text = '*Форвард нового сообщения из ВКонтакте:*\n\n' + (posts.json()['response']['items'][j]['copy_history'][0]['text']) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'\_'+str(posts.json()['response']['items'][j]['id'])
+                            full_text_to_FB = '<b>Форвард нового сообщения из ВКонтакте:</b>\n\n' + (posts.json()['response']['items'][j]['copy_history'][0]['text']) + '\n\nИсточник в ВК:\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'_'+str(posts.json()['response']['items'][j]['id'])
                         else:
                             full_text = '*Форвард нового сообщения из ВКонтакте:*\n\n' + str(elem_txt) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'\_'+str(posts.json()['response']['items'][j]['id'])
-                            full_text_to_FB = 'Форвард нового сообщения из ВКонтакте  ---- 2:\n\n' + str(elem_txt) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'\_'+str(posts.json()['response']['items'][j]['id'])
+                            full_text_to_FB = 'Форвард нового сообщения из ВКонтакте:\n\n' + str(elem_txt) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'\_'+str(posts.json()['response']['items'][j]['id'])
                         #print('...full_text = ' + full_text)
                         
                         bot_sendtext_to_FB_from_VK(full_text_to_FB) # функция  отправки сообщения из ВК в ФБ
 
-                        full_text = full_text.replace("#", " %23")  # шестнадцатеричный код символа # = 0023, т.е. для отображения '\x23'.
-                        if len(full_text) > 4096:
-                            full_text_fix= len(full_text)
-                            while full_text_fix > 4096:
-                                first_part_text = full_text[0:4096-35]
-                                point_end_of_text = first_part_text.rfind("\n")  
-                                first_part_to_send = first_part_text[0:point_end_of_text]               
-                                bot_sendtext_to_telega_from_VK(first_part_to_send + '\n_(продолжение следует...)_')
-                                full_text = '\n_(...продолжение)_\n' + full_text[point_end_of_text:len(full_text)]
-                                full_text_fix= len(full_text)
-                            else:
-                                bot_sendtext_to_telega_from_VK(full_text)
-                        else:
-                            bot_sendtext_to_telega_from_VK(full_text)
+                        # full_text = full_text.replace("#", " %23")  # шестнадцатеричный код символа # = 0023, т.е. для отображения '\x23'.
+                        # if len(full_text) > 4096:
+                        #     full_text_fix= len(full_text)
+                        #     while full_text_fix > 4096:
+                        #         first_part_text = full_text[0:4096-35]
+                        #         point_end_of_text = first_part_text.rfind("\n")  
+                        #         first_part_to_send = first_part_text[0:point_end_of_text]               
+                        #         bot_sendtext_to_telega_from_VK(first_part_to_send + '\n_(продолжение следует...)_')
+                        #         full_text = '\n_(...продолжение)_\n' + full_text[point_end_of_text:len(full_text)]
+                        #         full_text_fix= len(full_text)
+                        #     else:
+                        #         bot_sendtext_to_telega_from_VK(full_text)
+                        # else:
+                        #     bot_sendtext_to_telega_from_VK(full_text)
                         print('...публикуем и добавляем в базу пост с содержанием= ')
                         print((elem_txt)[:80])
                 else:
