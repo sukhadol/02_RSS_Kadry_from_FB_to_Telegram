@@ -321,6 +321,8 @@ def bot_sendtext_to_FB_from_VK(message_to_FB):
         print('...опубликовали в ФБ успешно ' + str(responseFB)[0:100]) # если все верно - то публикуем только первые 100 символов
     except (Exception, Error) as error:
         print("Какая-то ошибка отправки в ФБ - 323: ", error)
+        print('...хотели опубликовать пост:')
+        print(message_to_FB)
         text_tmp = "...Техническое сообщение. Не смогли отправить пост в ФБ. Ошибка строки 323" 
         send_text = 'https://api.telegram.org/bot' + Token_bot_for_RSSfrom_FB + '/sendMessage?chat_id=' + ADMIN_CHAT + '&parse_mode=Markdown&text=' + text_tmp
         requests.get(send_text, proxies=proxies, headers=headers)
