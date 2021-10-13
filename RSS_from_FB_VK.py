@@ -498,16 +498,28 @@ def grabber_from_VK():
                           #  full_text = '*Форвард нового сообщения из ВКонтакте:*\n\n' + (posts.json()['response']['items'][j]['copy_history'][0]['text']) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'\_'+str(posts.json()['response']['items'][j]['id'])
                           #  full_text_to_FB = 'Форвард нового сообщения из ВКонтакте --21:\n\n' + (posts.json()['response']['items'][j]['copy_history'][0]['text']) + '\n\n'+'https://vk.com/wall'+str(groupId_in_VK)+'_'
 
+                            full_text_to_FB = 'Форвард нового сообщения из ВКонтакте - тест 0001' 
+                            print('... ... отправка 01')
+                            print(full_text_to_FB)
+                            bot_sendtext_to_FB_from_VK(full_text_to_FB)
+                            full_text_to_FB = 'Форвард нового сообщения из ВКонтакте - тест 002</br>и еще 2 слова' 
+                            print('... ... отправка 02')
+                            print(full_text_to_FB)
+                            bot_sendtext_to_FB_from_VK(full_text_to_FB)
                             full_text_to_FB = 'Форвард нового сообщения из ВКонтакте --41:\n\n' 
+                            print('... ... отправка 1')
                             print(full_text_to_FB)
                             bot_sendtext_to_FB_from_VK(full_text_to_FB)
                             full_text_to_FB = full_text_to_FB  + (posts.json()['response']['items'][j]['copy_history'][0]['text']) 
+                            print('... ... отправка 2')
                             print(full_text_to_FB)
                             bot_sendtext_to_FB_from_VK(full_text_to_FB)
                             full_text_to_FB = full_text_to_FB + '\n\n'
+                            print('... ... отправка 3')
                             print(full_text_to_FB)
                             bot_sendtext_to_FB_from_VK(full_text_to_FB)
                             full_text_to_FB = full_text_to_FB +'https://vk.com/wall'
+                            print('... ... отправка 4')
                             print(full_text_to_FB)
                             bot_sendtext_to_FB_from_VK(full_text_to_FB)
                             full_text_to_FB = full_text_to_FB +str(groupId_in_VK)
