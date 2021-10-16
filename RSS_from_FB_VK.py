@@ -364,61 +364,77 @@ def read_article_feed(feed):
             document = pq(article['summary'])
             text_of_article = document.text() # это получили чистый текст, без кодов
             text_of_article = text_of_article.replace("(Feed generated with FetchRSS)", "") # убрали фразу (Feed generated with FetchRSS)
-            text_of_article = text_of_article.replace("\n\n\n", "\n")      
-            # если в ФБ был репост, то видим на странице пустое сообщение, поэтому его корректируем
-            if text_of_article == '':
-                text_of_article = text_of_article + article['title']
-                text_of_article = text_of_article.replace("A post from", "Репост от") + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
+            text_of_article = text_of_article.replace("\n\n\n", "\n")    
 
-
-            # далее блок для ситуации, когда пост пустой, только с картинкой. Надо выявить что это картинка и отправить ее в телеграм вместо текстового сообщения.     
-            # проверяем есть ли в тексте картинка. Точнее, ссылка на картинку 
-            #text_contain_link_img = document('img')
-            #text_img_url = text_contain_link_img.attr.src 
-            #print('text_img_url = ')
-            #print(text_img_url)"""
-            # ссылки на картинки имеют примерно такой вид:  'https://scontent.fuio21-1.fna.fbcdn.net/v/t39.30808-6/p526x296/224814408_642300336746164_111193416309050958_n.jpg?_nc_cat=104&amp;ccb=1-4&amp;_nc_sid=8bfeb9&amp;_nc_ohc=UAecGpHkqOwAX8jbrXr&amp;_nc_oc=AQkVEDVvCWflBpBL5TXZ6-0gZ8HZ3d3cXClRnSOLvmjJYi42BABYQ65vNvm33zC_MGI&amp;_nc_ht=scontent.fuio21-1.fna&amp;oh=a46c7f7d2ffdf54f812dca4546812434&amp;oe=6119E316'
-            #если реальной картинки нет, то fetchrss.com подставляет свою, ее надо НЕ учитывать. Т.е. алгоритм работы с картинкой должен запускаться только когда картинка НЕ от fetchrss.com  
-            #if 'fetchrss.com' not in text_img_url:
-            #    # !!! здесь как раз и надо как-то прописать код отправки картинки. Сначала надо локально сохранить картинку, потом ее выдать и удалить. Заготовка на будущее
-            #    # но!! визуально сильно выбивается из общего стиля, поэтому не стал запускать
-            #    file_to_send_as_img = open("D:\\09.jpg", "rb")  # - вариант что уже картинка у нас есть, далее работает. Сохранение из Инета не делал
-            #    IfWithoutText_url = "https://api.telegram.org/bot" + Token_bot_for_RSSfrom_FB + "/sendPhoto"
-            #    IfWithoutText_files = {'photo': file_to_send_as_img} 
-            #    IfWithoutText_data = {'chat_id' : ChatID_for_RSSfrom_FB, "caption": '(Форвард нового сообщения из Фейсбука)\n' +  text_of_article + article['link']}
-            #    requests.post(IfWithoutText_url, files=IfWithoutText_files, data=IfWithoutText_data)
-            #    #IfWithoutText_result= requests.post(IfWithoutText_url, files=IfWithoutText_files, data=IfWithoutText_data)
-            #    #print(IfWithoutText_result.json())
-            #    #print('IfWithoutText_result.text = ')
-            #    #print(IfWithoutText_result.text)
-            #else:
-            #    print('ничего не делаем') """
-
-            if article_NOT_in_BazeFromRSS(article['title'], article['published']):
-                add_article_to_db_from_FB(article['title'], article['published'])
-                # далее 5 строк - варианты публикации в ВК
-                if(len(text_of_article)) > 2500: # без этого ограничения выдавало ошибку 414 Request-URI Too Large
-                    bot_sendtext_to_VK_from_FB('Форвард нового сообщения из Фейсбука:\n\n' + text_of_article[: 2500] + '...\n\nПродолжение в источнике:\n' + article['link']) #эта строка была сокращенной версией, без учета излишне длинных сообщений
+            if article_NOT_in_BazeFromRSS(article['title'], article['published']): # проверяем в базе по полям, которые содержат ЗАГОЛОВОК и ДАТУ ПУБЛИКАЦИИ
+            #для начала каждый пост проверяем на зацикливание из ФБ - форвардов из разных источников (ВКонтате и Телеграма)
+                if(text_of_article.startswith(('Форвард нового сообщения из ВКонтакте', 'Форвард нового сообщения из Телеграм'))):
+                    print('...публиковать данный пост не надо, оно и так в ФБ пришло из смежных групп. Но чтобы не сбиваться - надо добавить его в базу. Речь о посте=')
+                    print((text_of_article)[:80])
+                    add_article_to_db_from_FB(article['title'], article['published'])
                 else:
-                    bot_sendtext_to_VK_from_FB('Форвард нового сообщения из Фейсбука:\n\n' + text_of_article + article['link']) #эта строка была сокращенной версией, без учета излишне длинных сообщений
-                full_text = '*Форвард нового сообщения из Фейсбука:*\n\n' + text_of_article + article['link']
-                full_text = full_text.replace("#", " %23")  # шестнадцатеричный код символа # = 0023, т.е. для отображения в теории '\x23' но оно не сработало, рекомендовали замену на %23.
-                if len(full_text) > 4096:
-                    full_text_fix= len(full_text)
-                    while full_text_fix > 4096:
-                        first_part_text = full_text[0:4096-35]
-                        point_end_of_text = first_part_text.rfind("\n")  
-                        first_part_to_send = first_part_text[0:point_end_of_text]               
-                        bot_sendtext_to_telega_kadry(first_part_to_send + '\n_(продолжение следует...)_')
-                        full_text = '\n_(...продолжение)_\n' + full_text[point_end_of_text:len(full_text)]
+                    add_article_to_db_from_FB(article['title'], article['published'])
+
+                    # если в ФБ был репост тоже из ФБ, то видим на странице пустое сообщение, поэтому его корректируем
+                    if text_of_article == '':
+                        text_of_article = text_of_article + article['title']
+                        text_of_article = text_of_article.replace("A post from", "Репост от") + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
+                    elif text_of_article == '#вакансия': # это в том случае, если я при форварде сообщщения в группу добавил слово ВАКАНСИЯ, но больше ничего там нет
+                        text_of_article = text_of_article + '\n' + article['title']
+                        text_of_article = text_of_article.replace("A post from", "Репост от") + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
+                    elif text_of_article == '#вакансия ':
+                        text_of_article = text_of_article + '\n' + article['title']
+                        text_of_article = text_of_article.replace("A post from", "Репост от") + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
+                    elif text_of_article == '#вакансия\n':
+                        text_of_article = text_of_article + article['title']
+                        text_of_article = text_of_article.replace("A post from", "Репост от") + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
+
+                    # далее блок для ситуации, когда пост пустой, только с картинкой. Надо выявить что это картинка и отправить ее в телеграм вместо текстового сообщения.     
+                    # проверяем есть ли в тексте картинка. Точнее, ссылка на картинку 
+                    #text_contain_link_img = document('img')
+                    #text_img_url = text_contain_link_img.attr.src 
+                    #print('text_img_url = ')
+                    #print(text_img_url)"""
+                    # ссылки на картинки имеют примерно такой вид:  'https://scontent.fuio21-1.fna.fbcdn.net/v/t39.30808-6/p526x296/224814408_642300336746164_111193416309050958_n.jpg?_nc_cat=104&amp;ccb=1-4&amp;_nc_sid=8bfeb9&amp;_nc_ohc=UAecGpHkqOwAX8jbrXr&amp;_nc_oc=AQkVEDVvCWflBpBL5TXZ6-0gZ8HZ3d3cXClRnSOLvmjJYi42BABYQ65vNvm33zC_MGI&amp;_nc_ht=scontent.fuio21-1.fna&amp;oh=a46c7f7d2ffdf54f812dca4546812434&amp;oe=6119E316'
+                    #если реальной картинки нет, то fetchrss.com подставляет свою, ее надо НЕ учитывать. Т.е. алгоритм работы с картинкой должен запускаться только когда картинка НЕ от fetchrss.com  
+                    #if 'fetchrss.com' not in text_img_url:
+                    #    # !!! здесь как раз и надо как-то прописать код отправки картинки. Сначала надо локально сохранить картинку, потом ее выдать и удалить. Заготовка на будущее
+                    #    # но!! визуально сильно выбивается из общего стиля, поэтому не стал запускать
+                    #    file_to_send_as_img = open("D:\\09.jpg", "rb")  # - вариант что уже картинка у нас есть, далее работает. Сохранение из Инета не делал
+                    #    IfWithoutText_url = "https://api.telegram.org/bot" + Token_bot_for_RSSfrom_FB + "/sendPhoto"
+                    #    IfWithoutText_files = {'photo': file_to_send_as_img} 
+                    #    IfWithoutText_data = {'chat_id' : ChatID_for_RSSfrom_FB, "caption": '(Форвард нового сообщения из Фейсбука)\n' +  text_of_article + article['link']}
+                    #    requests.post(IfWithoutText_url, files=IfWithoutText_files, data=IfWithoutText_data)
+                    #    #IfWithoutText_result= requests.post(IfWithoutText_url, files=IfWithoutText_files, data=IfWithoutText_data)
+                    #    #print(IfWithoutText_result.json())
+                    #    #print('IfWithoutText_result.text = ')
+                    #    #print(IfWithoutText_result.text)
+                    #else:
+                    #    print('ничего не делаем') """
+
+                    # далее 5 строк - варианты публикации в ВК
+                    if(len(text_of_article)) > 2500: # без этого ограничения выдавало ошибку 414 Request-URI Too Large
+                        bot_sendtext_to_VK_from_FB('Форвард нового сообщения из Фейсбука:\n\n' + text_of_article[: 2500] + '...\n\nПродолжение в источнике:\n' + article['link']) #эта строка была сокращенной версией, без учета излишне длинных сообщений
+                    else:
+                        bot_sendtext_to_VK_from_FB('Форвард нового сообщения из Фейсбука:\n\n' + text_of_article + article['link']) #эта строка была сокращенной версией, без учета излишне длинных сообщений
+                    full_text = '*Форвард нового сообщения из Фейсбука:*\n\n' + text_of_article + article['link']
+                    full_text = full_text.replace("#", " %23")  # шестнадцатеричный код символа # = 0023, т.е. для отображения в теории '\x23' но оно не сработало, рекомендовали замену на %23.
+                    if len(full_text) > 4096:
                         full_text_fix= len(full_text)
+                        while full_text_fix > 4096:
+                            first_part_text = full_text[0:4096-35]
+                            point_end_of_text = first_part_text.rfind("\n")  
+                            first_part_to_send = first_part_text[0:point_end_of_text]               
+                            bot_sendtext_to_telega_kadry(first_part_to_send + '\n_(продолжение следует...)_')
+                            full_text = '\n_(...продолжение)_\n' + full_text[point_end_of_text:len(full_text)]
+                            full_text_fix= len(full_text)
+                        else:
+                            bot_sendtext_to_telega_kadry(full_text)
                     else:
                         bot_sendtext_to_telega_kadry(full_text)
-                else:
-                    bot_sendtext_to_telega_kadry(full_text)
 
-                print('...публикуем и добавляем в базу пост с заголовком= ')
-                print(article['title'])
+                    print('...публикуем и добавляем в базу пост с заголовком= ')
+                    print(article['title'])
             else:
                 print('...добавлять и публиковать данный пост не надо, уже есть, речь о посте=')
                 print((article['title'])[:100]) #публикуем только первые 100 символов
@@ -498,7 +514,7 @@ def grabber_from_VK():
 
                 elem_txt=(posts.json()['response']['items'][j]['text']) 
                 if article_NOT_in_BazeFromVK(str(posts.json()['response']['items'][j]['id'])):
-                    #еще проверяем на зацикливание из ВК - форвардов из разных источников (Фейсбука и Телеграма). 
+                    #для начала каждый пост проверяем на зацикливание из ВК - форвардов из разных источников (Фейсбука и Телеграма). 
                     if(elem_txt.startswith(('Форвард нового сообщения из Фейсбука', 'Форвард нового сообщения из Телеграм'))):
                         print('...публиковать данный пост не надо, это было в ВК и так уже форвард. Но чтобы не сбиваться - надо добавить его в базу. Речь о посте=')
                         print((elem_txt)[:80])
