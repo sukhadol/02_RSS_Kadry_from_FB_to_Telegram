@@ -388,6 +388,14 @@ def read_article_feed(feed):
                     elif text_of_article == '#вакансия\n':
                         text_of_article = text_of_article + article['title']
                         text_of_article = text_of_article.replace("A post from", "Репост от") + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
+                    elif 'вакансия' in text_of_article:
+                        print('...есть слово ВАКАНСИЯ, текст = ')
+                        print(text_of_article)
+                        if '#вакансия' in text_of_article:
+                            print('...есть слово #ВАКАНСИЯ')
+                        else:
+                            print('...есть слово ВАКАНСИЯ но нет #ВАКАНСИЯ')
+                        print('... ... Теперь думай')
 
                     # далее блок для ситуации, когда пост пустой, только с картинкой. Надо выявить что это картинка и отправить ее в телеграм вместо текстового сообщения.     
                     # проверяем есть ли в тексте картинка. Точнее, ссылка на картинку 
