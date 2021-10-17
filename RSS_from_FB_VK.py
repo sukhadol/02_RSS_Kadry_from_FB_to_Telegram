@@ -374,26 +374,25 @@ def read_article_feed(feed):
                     add_article_to_db_from_FB(article['title'], article['published'])
                 else:
                     add_article_to_db_from_FB(article['title'], article['published'])
+                    print('... ... author = ')
+                    print(article['author'])
+                    print('... ... dc:creator = ')
+                    print(article['dc:creator'])                   
 
                     # если в ФБ был репост тоже из ФБ, то видим на странице пустое сообщение, поэтому его корректируем
                     if text_of_article == '':
                         text_of_article = text_of_article + article['title']
                         text_of_article = text_of_article.replace("A post from", "Репост от") + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
                     elif text_of_article == '#вакансия': # это в том случае, если я при форварде сообщщения в группу добавил слово ВАКАНСИЯ, но больше ничего там нет
-                        #text_of_article = text_of_article + '\n' + article['title']
-                        text_of_article = text_of_article + "\n\n" + "Репост от " + article['dc:creator'] + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
+                        text_of_article = text_of_article + "\n\n" + "Репост от " + str(article['dc:creator']) + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
                     elif text_of_article == '#вакансия ':
-                        #text_of_article = text_of_article + '\n' + article['title']
-                        text_of_article = text_of_article + "\n\n" +  "Репост от " + article['dc:creator'] + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
+                        text_of_article = text_of_article + "\n\n" +  "Репост от " + str(article['dc:creator']) + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
                     elif text_of_article == '#вакансия\n':
-                        #text_of_article = text_of_article + article['title']
-                        text_of_article = text_of_article + "\n" + "Репост от " + article['dc:creator'] + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
+                        text_of_article = text_of_article + "\n" + "Репост от " + str(article['dc:creator']) + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
                     elif text_of_article == '#вакансия\n\n':
-                        #text_of_article = text_of_article + article['title']
-                        text_of_article = text_of_article + "Репост от " + article['dc:creator'] +  ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
+                        text_of_article = text_of_article + "Репост от " + str(article['dc:creator']) +  ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
                     elif text_of_article == '#вакансия\n\n\n':
-                        #text_of_article = text_of_article + article['title']
-                        text_of_article = text_of_article + "Репост от " + article['dc:creator'] + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
+                        text_of_article = text_of_article + "Репост от " + str(article['dc:creator']) + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
                     elif 'вакансия' in text_of_article:
                         print('...есть слово ВАКАНСИЯ, текст = ')
                         print(text_of_article)
@@ -450,7 +449,7 @@ def read_article_feed(feed):
                     print('...публикуем и добавляем в базу пост с заголовком= ')
                     print(article['title'])
             else:
-                print('...добавлять и публиковать данный пост не надо, уже есть, речь о посте=')
+                print('...добавлять и публиковать данный пост НЕ надо, уже есть, речь о посте=')
                 print((article['title'])[:100]) #публикуем только первые 100 символов
 #               print(text_of_article)
     except (Exception, Error) as error:
