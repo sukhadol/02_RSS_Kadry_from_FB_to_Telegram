@@ -380,20 +380,20 @@ def read_article_feed(feed):
                         text_of_article = text_of_article + article['title']
                         text_of_article = text_of_article.replace("A post from", "Репост от") + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
                     elif text_of_article == '#вакансия': # это в том случае, если я при форварде сообщщения в группу добавил слово ВАКАНСИЯ, но больше ничего там нет
-                        text_of_article = text_of_article + '\n' + article['title']
-                        text_of_article = "Репост от " + article['dc:creator'] + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
+                        #text_of_article = text_of_article + '\n' + article['title']
+                        text_of_article = text_of_article + "\n\n" + "Репост от " + article['dc:creator'] + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
                     elif text_of_article == '#вакансия ':
-                        text_of_article = text_of_article + '\n' + article['title']
-                        text_of_article = "Репост от " + article['dc:creator'] + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
+                        #text_of_article = text_of_article + '\n' + article['title']
+                        text_of_article = text_of_article + "\n\n" +  "Репост от " + article['dc:creator'] + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
                     elif text_of_article == '#вакансия\n':
-                        text_of_article = text_of_article + article['title']
-                        text_of_article = "Репост от " + article['dc:creator'] + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
+                        #text_of_article = text_of_article + article['title']
+                        text_of_article = text_of_article + "\n" + "Репост от " + article['dc:creator'] + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
                     elif text_of_article == '#вакансия\n\n':
-                        text_of_article = text_of_article + article['title']
-                        text_of_article = "Репост от " + article['dc:creator'] +  ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
+                        #text_of_article = text_of_article + article['title']
+                        text_of_article = text_of_article + "Репост от " + article['dc:creator'] +  ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
                     elif text_of_article == '#вакансия\n\n\n':
-                        text_of_article = text_of_article + article['title']
-                        text_of_article = "Репост от " + article['dc:creator'] + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
+                        #text_of_article = text_of_article + article['title']
+                        text_of_article = text_of_article + "Репост от " + article['dc:creator'] + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
                     elif 'вакансия' in text_of_article:
                         print('...есть слово ВАКАНСИЯ, текст = ')
                         print(text_of_article)
