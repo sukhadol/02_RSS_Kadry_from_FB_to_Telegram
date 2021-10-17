@@ -368,41 +368,34 @@ def read_article_feed(feed):
 
             if article_NOT_in_BazeFromRSS(article['title'], article['published']): # проверяем в базе по полям, которые содержат ЗАГОЛОВОК и ДАТУ ПУБЛИКАЦИИ
             #для начала каждый пост проверяем на зацикливание из ФБ - форвардов из разных источников (ВКонтате и Телеграма)
-                print('... ... author = ')
-                print(article['author'])
                 if(text_of_article.startswith(('Форвард нового сообщения из ВКонтакте', 'Форвард нового сообщения из Телеграм'))):
                     print('...публиковать данный пост не надо, оно и так в ФБ пришло из смежных групп. Но чтобы не сбиваться - надо добавить его в базу. Речь о посте=')
                     print((text_of_article)[:80])
                     add_article_to_db_from_FB(article['title'], article['published'])
                 else:
                     add_article_to_db_from_FB(article['title'], article['published'])
-                    print('... ... author = ')
-                    print(article['author'])
-                    print('... ... dc:creator = ')
-                    print(article['dc:creator'])                   
-
                     # если в ФБ был репост тоже из ФБ, то видим на странице пустое сообщение, поэтому его корректируем
                     if text_of_article == '':
                         text_of_article = text_of_article + article['title']
                         text_of_article = text_of_article.replace("A post from", "Репост от") + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
                     elif text_of_article == '#вакансия': # это в том случае, если я при форварде сообщщения в группу добавил слово ВАКАНСИЯ, но больше ничего там нет
-                        text_of_article = text_of_article + "\n\n" + "Репост от " + str(article['dc:creator']) + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
+                        text_of_article = text_of_article + "\n\n" + "Репост от " + str(article['author']) + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
                     elif text_of_article == '#вакансия ':
-                        text_of_article = text_of_article + "\n\n" +  "Репост от " + str(article['dc:creator']) + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
+                        text_of_article = text_of_article + "\n\n" +  "Репост от " + str(article['author']) + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
                     elif text_of_article == '#вакансия\n':
-                        text_of_article = text_of_article + "\n" + "Репост от " + str(article['dc:creator']) + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
+                        text_of_article = text_of_article + "\n" + "Репост от " + str(article['author']) + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
                     elif text_of_article == '#вакансия\n\n':
-                        text_of_article = text_of_article + "Репост от " + str(article['dc:creator']) +  ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
+                        text_of_article = text_of_article + "Репост от " + str(article['author']) +  ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
                     elif text_of_article == '#вакансия\n\n\n':
-                        text_of_article = text_of_article + "Репост от " + str(article['dc:creator']) + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
-                    elif 'вакансия' in text_of_article:
-                        print('...есть слово ВАКАНСИЯ, текст = ')
-                        print(text_of_article)
-                        if '#вакансия' in text_of_article:
-                            print('...есть слово #ВАКАНСИЯ')
-                        else:
-                            print('...есть слово ВАКАНСИЯ но нет #ВАКАНСИЯ')
-                        print('... ... Теперь думай')
+                        text_of_article = text_of_article + "Репост от " + str(article['author']) + ", поэтому полный текст сообщения смотрите на Facebook по ссылке\n"
+                    # elif 'вакансия' in text_of_article:
+                    #     print('...есть слово ВАКАНСИЯ, текст = ')
+                    #     print(text_of_article)
+                    #     if '#вакансия' in text_of_article:
+                    #         print('...есть слово #ВАКАНСИЯ')
+                    #     else:
+                    #         print('...есть слово ВАКАНСИЯ но нет #ВАКАНСИЯ')
+                    #     print('... ... Теперь думай')
 
                     # далее блок для ситуации, когда пост пустой, только с картинкой. Надо выявить что это картинка и отправить ее в телеграм вместо текстового сообщения.     
                     # проверяем есть ли в тексте картинка. Точнее, ссылка на картинку 
